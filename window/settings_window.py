@@ -1,13 +1,7 @@
 from typing import cast
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets, QtGui
 
-from setting_keys import SettingKeys
-
-DEFAULTS = {
-    SettingKeys.SHOW_MENU_BAR: True,
-    SettingKeys.SEEK_STEP: 10,
-    SettingKeys.SAVE_POSITION_ON_EXIT: False,
-}
+from setting_keys import SettingKeys, DEFAULTS
 
 
 class SettingsWindow(QtWidgets.QDialog):
@@ -48,6 +42,19 @@ class SettingsWindow(QtWidgets.QDialog):
         behavior_layout.addStretch()
         self.tab_widget.addTab(behavior_tab, "Behavior")
 
+        # Keyboard Shortcuts tab
+        keyboard_tab = QtWidgets.QWidget()
+        keyboard_layout = QtWidgets.QFormLayout(keyboard_tab)
+        self.play_pause_edit = QtWidgets.QKeySequenceEdit()
+        self.seek_forward_edit = QtWidgets.QKeySequenceEdit()
+        self.seek_backward_edit = QtWidgets.QKeySequenceEdit()
+        self.fullscreen_edit = QtWidgets.QKeySequenceEdit()
+        keyboard_layout.addRow("Play/Pause:", self.play_pause_edit)
+        keyboard_layout.addRow("Seek Forward:", self.seek_forward_edit)
+        keyboard_layout.addRow("Seek Backward:", self.seek_backward_edit)
+        keyboard_layout.addRow("Toggle Fullscreen:", self.fullscreen_edit)
+        self.tab_widget.addTab(keyboard_tab, "Keyboard Shortcuts")
+
         # Buttons
         button_box = QtWidgets.QDialogButtonBox(
             QtWidgets.QDialogButtonBox.StandardButton.Ok |
@@ -68,13 +75,29 @@ class SettingsWindow(QtWidgets.QDialog):
         self.seek_step_spinbox.setValue(int(cast(int, seek_step)))
 
         save_position = self.settings.value(SettingKeys.SAVE_POSITION_ON_EXIT,
-                                            DEFAULTS[SettingKeys.SAVE_POSITION_ON_EXIT])
+                                             DEFAULTS[SettingKeys.SAVE_POSITION_ON_EXIT])
         self.save_position_checkbox.setChecked(bool(save_position))
+
+        play_pause_shortcut = self.settings.value(SettingKeys.PLAY_PAUSE_SHORTCUT, DEFAULTS[SettingKeys.PLAY_PAUSE_SHORTCUT])
+        self.play_pause_edit.setKeySequence(QtGui.QKeySequence.fromString(str(play_pause_shortcut)))
+
+        seek_forward_shortcut = self.settings.value(SettingKeys.SEEK_FORWARD_SHORTCUT, DEFAULTS[SettingKeys.SEEK_FORWARD_SHORTCUT])
+        self.seek_forward_edit.setKeySequence(QtGui.QKeySequence.fromString(str(seek_forward_shortcut)))
+
+        seek_backward_shortcut = self.settings.value(SettingKeys.SEEK_BACKWARD_SHORTCUT, DEFAULTS[SettingKeys.SEEK_BACKWARD_SHORTCUT])
+        self.seek_backward_edit.setKeySequence(QtGui.QKeySequence.fromString(str(seek_backward_shortcut)))
+
+        fullscreen_shortcut = self.settings.value(SettingKeys.FULLSCREEN_SHORTCUT, DEFAULTS[SettingKeys.FULLSCREEN_SHORTCUT])
+        self.fullscreen_edit.setKeySequence(QtGui.QKeySequence.fromString(str(fullscreen_shortcut)))
 
     def save_settings(self):
         self.settings.setValue(SettingKeys.SHOW_MENU_BAR, self.show_menu_bar_checkbox.isChecked())
         self.settings.setValue(SettingKeys.SEEK_STEP, self.seek_step_spinbox.value())
         self.settings.setValue(SettingKeys.SAVE_POSITION_ON_EXIT, self.save_position_checkbox.isChecked())
+        self.settings.setValue(SettingKeys.PLAY_PAUSE_SHORTCUT, self.play_pause_edit.keySequence().toString())
+        self.settings.setValue(SettingKeys.SEEK_FORWARD_SHORTCUT, self.seek_forward_edit.keySequence().toString())
+        self.settings.setValue(SettingKeys.SEEK_BACKWARD_SHORTCUT, self.seek_backward_edit.keySequence().toString())
+        self.settings.setValue(SettingKeys.FULLSCREEN_SHORTCUT, self.fullscreen_edit.keySequence().toString())
         self.settings.sync()
 
     def accept(self):

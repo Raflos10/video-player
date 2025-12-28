@@ -4,7 +4,7 @@ from main_menu_bar import MainMenuBar
 from video_display import VideoDisplay
 from video_controls import VideoControls
 from media_controller import MediaController
-from helpers import open_and_load_file
+from helpers import open_and_load_file, setup_shortcuts
 from window.settings_window import SettingsWindow
 
 
@@ -39,6 +39,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.videoDisplay.connect_signals(self.mediaController, self.toggle_fullscreen, file_dialog_handler)
         self.menu_bar.connect_signals(file_dialog_handler, self.toggle_fullscreen, self.open_settings)
 
+        setup_shortcuts(self, settings)
+
     def update_ui_visibility(self):
         is_fullscreen = self.isFullScreen()
         self.menuBar().setVisible(not is_fullscreen)
@@ -58,3 +60,4 @@ class ApplicationWindow(QtWidgets.QMainWindow):
     def open_settings(self):
         settings_dialog = SettingsWindow(self.settings, self)
         settings_dialog.exec()
+        setup_shortcuts(self, self.settings)

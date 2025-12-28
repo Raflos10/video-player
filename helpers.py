@@ -1,11 +1,46 @@
 import os
-from PySide6 import QtWidgets
+from typing import cast
+
+from PySide6 import QtWidgets, QtGui, QtCore
+
+from setting_keys import SettingKeys, DEFAULTS
 
 
 def format_time(seconds):
     mins = int(seconds // 60)
     secs = int(seconds % 60)
     return f"{mins}:{secs:02d}"
+
+
+def setup_shortcuts(window, settings: QtCore.QSettings):
+    if hasattr(window, 'shortcuts'):
+        for s in window.shortcuts:
+            s.deleteLater()
+    window.shortcuts = []
+
+    play_pause_key = settings.value(SettingKeys.PLAY_PAUSE_SHORTCUT, DEFAULTS[SettingKeys.PLAY_PAUSE_SHORTCUT])
+    seek_forward_key = settings.value(SettingKeys.SEEK_FORWARD_SHORTCUT, DEFAULTS[SettingKeys.SEEK_FORWARD_SHORTCUT])
+    seek_backward_key = settings.value(SettingKeys.SEEK_BACKWARD_SHORTCUT, DEFAULTS[SettingKeys.SEEK_BACKWARD_SHORTCUT])
+    fullscreen_key = settings.value(SettingKeys.FULLSCREEN_SHORTCUT, DEFAULTS[SettingKeys.FULLSCREEN_SHORTCUT])
+    seek_step = int(cast(int, settings.value(SettingKeys.SEEK_STEP, DEFAULTS[SettingKeys.SEEK_STEP])))
+
+    play_pause_shortcut: QtGui.QShortcut = QtGui.QShortcut(QtGui.QKeySequence.fromString(str(play_pause_key)), window)
+    play_pause_shortcut.activated.connect(window.mediaController.toggle_playback)
+    window.shortcuts.append(play_pause_shortcut)
+
+    seek_forward_shortcut: QtGui.QShortcut = QtGui.QShortcut(QtGui.QKeySequence.fromString(str(seek_forward_key)), window)
+    seek_forward_shortcut.activated.connect(lambda: window.mediaController.mediaPlayer.setPosition(
+        window.mediaController.mediaPlayer.position() + seek_step * 1000))
+    window.shortcuts.append(seek_forward_shortcut)
+
+    seek_backward_shortcut: QtGui.QShortcut = QtGui.QShortcut(QtGui.QKeySequence.fromString(str(seek_backward_key)), window)
+    seek_backward_shortcut.activated.connect(lambda: window.mediaController.mediaPlayer.setPosition(
+        window.mediaController.mediaPlayer.position() - seek_step * 1000))
+    window.shortcuts.append(seek_backward_shortcut)
+
+    fullscreen_shortcut: QtGui.QShortcut = QtGui.QShortcut(QtGui.QKeySequence.fromString(str(fullscreen_key)), window)
+    fullscreen_shortcut.activated.connect(window.toggle_fullscreen)
+    window.shortcuts.append(fullscreen_shortcut)
 
 
 def open_and_load_file(parent, load_media):
