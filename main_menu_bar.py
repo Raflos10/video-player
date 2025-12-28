@@ -13,6 +13,7 @@ class MainMenuBar(QtWidgets.QMenuBar):
         self.open_action = file_menu.addAction("Open File")
         self.open_action.setShortcut(QtGui.QKeySequence.StandardKey.Open)
         exit_action = file_menu.addAction("Exit")
+        exit_action.setShortcut(QtGui.QKeySequence.StandardKey.Quit)
 
         self.fullscreen_action = view_menu.addAction("Fullscreen")
         self.fullscreen_action.setCheckable(True)
