@@ -5,18 +5,19 @@ from video_display import VideoDisplay
 from video_controls import VideoControls
 from media_controller import MediaController
 from helpers import open_and_load_file
+from window.settings_window import SettingsWindow
 
 
 class ApplicationWindow(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, settings: QtCore.QSettings):
         super().__init__()
+
+        self.settings = settings
 
         self.setWindowTitle("Video Player")
 
         self.menu_bar = MainMenuBar()
         self.setMenuBar(self.menu_bar)
-        # SettingsManager.apply_settings(self.menu_bar)
-        # SettingsManager.restore_geometry(self)
 
         self.videoDisplay = VideoDisplay()
         self.videoControls = VideoControls()
@@ -54,7 +55,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         else:
             self.showFullScreen()
 
-    # def open_settings(self):
-    #     settings_dialog = SettingsWindow(self)
-    #     settings_dialog.exec()
-    #     SettingsManager.apply_settings(self.menu_bar)
+    def open_settings(self):
+        settings_dialog = SettingsWindow(self.settings, self)
+        settings_dialog.exec()
