@@ -6,6 +6,8 @@ from setting_keys import SettingKeys, DEFAULTS
 
 class SettingsWindow(QtWidgets.QDialog):
 
+    settings_updated = QtCore.Signal()
+
     def __init__(self, settings: QtCore.QSettings, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Settings")
@@ -102,4 +104,5 @@ class SettingsWindow(QtWidgets.QDialog):
 
     def accept(self):
         self.save_settings()
+        self.settings_updated.emit()
         super().accept()

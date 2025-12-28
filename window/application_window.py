@@ -23,6 +23,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.videoControls = VideoControls()
         self.mediaController = MediaController(self.videoDisplay)
 
+        self.settings_window = SettingsWindow(self.settings, self)
+        self.settings_window.settings_updated.connect(lambda: setup_shortcuts(self, self.settings))
+
         self.central = QtWidgets.QWidget()
         self.layout = QtWidgets.QVBoxLayout(self.central)
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -58,6 +61,5 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             self.showFullScreen()
 
     def open_settings(self):
-        settings_dialog = SettingsWindow(self.settings, self)
-        settings_dialog.exec()
-        setup_shortcuts(self, self.settings)
+        self.settings_window.load_settings()
+        self.settings_window.exec()
