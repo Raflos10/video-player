@@ -21,7 +21,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         self.videoDisplay = VideoDisplay()
         self.videoControls = VideoControls()
-        self.mediaController = MediaController(self.videoDisplay)
+        self.mediaController = MediaController(self.videoDisplay.video_item)
 
         self.settings_window = SettingsWindow(self.settings, self)
         self.settings_window.settings_updated.connect(lambda: setup_shortcuts(self, self.settings))

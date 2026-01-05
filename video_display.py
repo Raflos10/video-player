@@ -1,7 +1,9 @@
-from PySide6 import QtCore, QtWidgets, QtGui, QtMultimedia, QtMultimediaWidgets
+from PySide6 import QtCore, QtWidgets, QtMultimedia, QtMultimediaWidgets, QtGui
+
+from subtitle.subtitle_graphics_item import SubtitleGraphicsItem
 
 
-class VideoDisplay(QtMultimediaWidgets.QVideoWidget):
+class VideoDisplay(QtWidgets.QGraphicsView):
     fullscreenToggled = QtCore.Signal()
     fileDialogRequested = QtCore.Signal()
     playToggled = QtCore.Signal()
@@ -9,16 +11,38 @@ class VideoDisplay(QtMultimediaWidgets.QVideoWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.mediaStatus = QtMultimedia.QMediaPlayer.MediaStatus.NoMedia
+        self.mediaStatus = QtMultimedia.QMediaPlayer.MediaStatus.NoMedia  # TODO: is it necessary?
 
-        self.busyIndicator = QtWidgets.QProgressBar(self)
-        self.busyIndicator.setRange(0, 0)  # Indeterminate
-        self.busyIndicator.setStyleSheet("background-color: transparent;")
-        self.busyIndicator.setVisible(False)
+        self.graphics_scene = QtWidgets.QGraphicsScene(self)
+        self.setScene(self.graphics_scene)
 
-        self.text = QtWidgets.QLabel("Click here to load a video", self)
-        self.text.setStyleSheet("font-size: 20px; background-color: transparent;")
-        self.text.setVisible(True)
+        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setStyleSheet("background-color: black;")
+
+        self.video_item = QtMultimediaWidgets.QGraphicsVideoItem()
+        self.graphics_scene.addItem(self.video_item)
+
+        self.center_text = QtWidgets.QGraphicsTextItem("Click here to load a video")
+        self.center_text.setDefaultTextColor(QtCore.Qt.GlobalColor.white)
+        self.center_text.setFont(QtGui.QFont("Arial", 20))
+        self.graphics_scene.addItem(self.center_text)
+
+        self.subtitle_item = SubtitleGraphicsItem()
+        self.current_subtitle_entries = []
+        self.graphics_scene.addItem(self.subtitle_item)
+
+        # self.busyProxy = QtWidgets.QGraphicsProxyWidget()
+        # self.busyIndicator = QtWidgets.QProgressBar()
+        # self.busyIndicator.setRange(0, 0)  # Indeterminate
+        # self.busyIndicator.setStyleSheet("background-color: rgba(0,0,0,128); color: white;")
+        # self.busyProxy.setWidget(self.busyIndicator)
+        # self.graphics_scene.addItem(self.busyProxy)
+
+        self.video_item.setZValue(0)
+        self.center_text.setZValue(1)
+        self.subtitle_item.setZValue(2)
+        # self.busyProxy.setZValue(3)
 
         self.setMouseTracking(True)
 
@@ -27,11 +51,42 @@ class VideoDisplay(QtMultimediaWidgets.QVideoWidget):
         self.fileDialogRequested.connect(file_dialog_handler)
         self.playToggled.connect(media_controller.toggle_playback)
 
+    def update_subtitle(self, position_ms, subtitles):
+        if subtitles:
+            entries = subtitles.get_all_at_time(position_ms / 1000) #TODO: precision
+            if entries != self.current_subtitle_entries:
+                self.on_new_subtitles(entries)
+
+    def on_new_subtitles(self, entries):
+        if len(entries) == 0:
+            self.subtitle_item.setVisible(False)
+            self.current_subtitle_entries = []
+            return
+
+        # TODO: loop
+        self.current_subtitle_entries = entries
+        entry = entries[0]
+        html = f'<div style="background-color: rgba(0,0,0,128); padding: 5px; border-radius: 3px;">{entry.text}</div>'
+        self.subtitle_item.setHtml(html)
+        self.subtitle_item.setVisible(True)
+        self.update_scene_rect()
+
     def set_media_status(self, status):
         self.mediaStatus = status
-        self.busyIndicator.setVisible(status == QtMultimedia.QMediaPlayer.MediaStatus.LoadingMedia)
-        self.text.setVisible(status == QtMultimedia.QMediaPlayer.MediaStatus.NoMedia)
-        self.update()
+        # self.busyProxy.setVisible(status == QtMultimedia.QMediaPlayer.MediaStatus.LoadingMedia)
+        self.center_text.setVisible(status == QtMultimedia.QMediaPlayer.MediaStatus.NoMedia)
+        self.update_scene_rect()
+
+    def update_scene_rect(self):
+        self.graphics_scene.setSceneRect(0, 0, self.width(), self.height())
+        self.video_item.setSize(QtCore.QSizeF(self.width(), self.height()))
+        center_x = self.width() / 2
+        center_y = self.height() / 2
+        self.center_text.setPos(center_x - self.center_text.boundingRect().width() / 2,
+                                center_y - self.center_text.boundingRect().height() / 2)
+        self.subtitle_item.setPos(center_x - self.subtitle_item.boundingRect().width() / 2,
+                                  self.height() - self.subtitle_item.boundingRect().height() - 20)
+        # self.busyProxy.setPos(center_x - self.busyProxy.boundingRect().width() / 2, center_y - self.busyProxy.boundingRect().height() / 2)
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
@@ -48,7 +103,4 @@ class VideoDisplay(QtMultimediaWidgets.QVideoWidget):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        self.busyIndicator.move(self.width() // 2 - self.busyIndicator.width() // 2,
-                                self.height() // 2 - self.busyIndicator.height() // 2)
-        self.text.move(self.width() // 2 - self.text.width() // 2,
-                        self.height() // 2 - self.text.height() // 2)
+        self.update_scene_rect()
