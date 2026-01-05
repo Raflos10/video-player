@@ -6,6 +6,10 @@ class SettingKeys:
     SEEK_FORWARD_SHORTCUT = "shortcuts/seek_forward"
     SEEK_BACKWARD_SHORTCUT = "shortcuts/seek_backward"
     FULLSCREEN_SHORTCUT = "shortcuts/fullscreen"
+    ENABLE_SUBTITLES = "subtitles/enable"
+    SUBTITLE_FONT_SIZE = "subtitles/font_size"
+    SUBTITLE_OUTLINE_SIZE = "subtitles/outline_size"
+
 
 DEFAULTS = {
     SettingKeys.SHOW_MENU_BAR: True,
@@ -15,4 +19,7 @@ DEFAULTS = {
     SettingKeys.SEEK_FORWARD_SHORTCUT: "Right",
     SettingKeys.SEEK_BACKWARD_SHORTCUT: "Left",
     SettingKeys.FULLSCREEN_SHORTCUT: "F",
+    SettingKeys.ENABLE_SUBTITLES: True,
+    SettingKeys.SUBTITLE_FONT_SIZE: 24,
+    SettingKeys.SUBTITLE_OUTLINE_SIZE: 5,
 }

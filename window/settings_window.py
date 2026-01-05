@@ -28,6 +28,14 @@ class SettingsWindow(QtWidgets.QDialog):
         appearance_layout = QtWidgets.QVBoxLayout(appearance_tab)
         self.show_menu_bar_checkbox = QtWidgets.QCheckBox("Show Menu Bar")
         appearance_layout.addWidget(self.show_menu_bar_checkbox)
+        self.enable_subtitles_checkbox = QtWidgets.QCheckBox("Enable Subtitles")
+        appearance_layout.addWidget(self.enable_subtitles_checkbox)
+        subtitle_font_layout = QtWidgets.QHBoxLayout()
+        subtitle_font_layout.addWidget(QtWidgets.QLabel("Subtitle Font Size:"))
+        self.subtitle_font_spinbox = QtWidgets.QSpinBox()
+        self.subtitle_font_spinbox.setRange(12, 48)
+        subtitle_font_layout.addWidget(self.subtitle_font_spinbox)
+        appearance_layout.addLayout(subtitle_font_layout)
         appearance_layout.addStretch()
         self.tab_widget.addTab(appearance_tab, "Appearance")
 
@@ -73,11 +81,17 @@ class SettingsWindow(QtWidgets.QDialog):
         show_menu_bar = self.settings.value(SettingKeys.SHOW_MENU_BAR, DEFAULTS[SettingKeys.SHOW_MENU_BAR])
         self.show_menu_bar_checkbox.setChecked(bool(show_menu_bar))
 
+        enable_subtitles = self.settings.value(SettingKeys.ENABLE_SUBTITLES, DEFAULTS[SettingKeys.ENABLE_SUBTITLES])
+        self.enable_subtitles_checkbox.setChecked(bool(enable_subtitles))
+
+        subtitle_font_size = self.settings.value(SettingKeys.SUBTITLE_FONT_SIZE, DEFAULTS[SettingKeys.SUBTITLE_FONT_SIZE])
+        self.subtitle_font_spinbox.setValue(int(cast(int, subtitle_font_size)))
+
         seek_step = self.settings.value(SettingKeys.SEEK_STEP, DEFAULTS[SettingKeys.SEEK_STEP])
         self.seek_step_spinbox.setValue(int(cast(int, seek_step)))
 
         save_position = self.settings.value(SettingKeys.SAVE_POSITION_ON_EXIT,
-                                             DEFAULTS[SettingKeys.SAVE_POSITION_ON_EXIT])
+                                              DEFAULTS[SettingKeys.SAVE_POSITION_ON_EXIT])
         self.save_position_checkbox.setChecked(bool(save_position))
 
         play_pause_shortcut = self.settings.value(SettingKeys.PLAY_PAUSE_SHORTCUT, DEFAULTS[SettingKeys.PLAY_PAUSE_SHORTCUT])
@@ -94,6 +108,8 @@ class SettingsWindow(QtWidgets.QDialog):
 
     def save_settings(self):
         self.settings.setValue(SettingKeys.SHOW_MENU_BAR, self.show_menu_bar_checkbox.isChecked())
+        self.settings.setValue(SettingKeys.ENABLE_SUBTITLES, self.enable_subtitles_checkbox.isChecked())
+        self.settings.setValue(SettingKeys.SUBTITLE_FONT_SIZE, self.subtitle_font_spinbox.value())
         self.settings.setValue(SettingKeys.SEEK_STEP, self.seek_step_spinbox.value())
         self.settings.setValue(SettingKeys.SAVE_POSITION_ON_EXIT, self.save_position_checkbox.isChecked())
         self.settings.setValue(SettingKeys.PLAY_PAUSE_SHORTCUT, self.play_pause_edit.keySequence().toString())
