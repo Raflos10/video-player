@@ -1,6 +1,8 @@
 from PySide6 import QtCore, QtWidgets, QtMultimedia, QtMultimediaWidgets, QtGui
 
+from settings_manager import settings_manager
 from subtitle.subtitle_graphics_item import SubtitleGraphicsItem
+from setting_keys import SettingKeys
 
 
 class VideoDisplay(QtWidgets.QGraphicsView):
@@ -47,18 +49,25 @@ class VideoDisplay(QtWidgets.QGraphicsView):
         self.setMouseTracking(True)
 
     def connect_signals(self, media_controller, toggle_fullscreen, file_dialog_handler):
+        settings_manager.settings_changed.connect(self.on_settings_changed)
+
         self.fullscreenToggled.connect(toggle_fullscreen)
         self.fileDialogRequested.connect(file_dialog_handler)
         self.playToggled.connect(media_controller.toggle_playback)
 
+    def on_settings_changed(self, key: str, value):
+        if key == SettingKeys.ENABLE_SUBTITLES:
+            self.subtitle_item.setVisible(value)
+
     def update_subtitle(self, position_ms, subtitles):
         if subtitles:
-            entries = subtitles.get_all_at_time(position_ms / 1000) #TODO: precision
+            entries = subtitles.get_all_at_time(position_ms)
             if entries != self.current_subtitle_entries:
                 self.on_new_subtitles(entries)
 
     def on_new_subtitles(self, entries):
-        if len(entries) == 0:
+        enable_subtitles = settings_manager.value(SettingKeys.ENABLE_SUBTITLES)
+        if len(entries) == 0 or not enable_subtitles:
             self.subtitle_item.setVisible(False)
             self.current_subtitle_entries = []
             return
@@ -66,8 +75,7 @@ class VideoDisplay(QtWidgets.QGraphicsView):
         # TODO: loop
         self.current_subtitle_entries = entries
         entry = entries[0]
-        html = f'<div style="background-color: rgba(0,0,0,128); padding: 5px; border-radius: 3px;">{entry.text}</div>'
-        self.subtitle_item.setHtml(html)
+        self.subtitle_item.setPlainText(entry.text)
         self.subtitle_item.setVisible(True)
         self.update_scene_rect()
 

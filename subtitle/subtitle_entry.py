@@ -4,13 +4,13 @@ from dataclasses import dataclass
 @dataclass
 class SubtitleEntry:
     index: int
-    start_time: float
-    end_time: float
+    start_ms: int
+    end_ms: int
     text: str
 
     @property
     def duration(self) -> float:
-        return self.end_time - self.start_time
+        return (self.end_ms - self.start_ms) / 1000.0
 
-    def is_displayed_at(self, time_seconds: float) -> bool:
-        return self.start_time <= time_seconds <= self.end_time
+    def is_displayed_at(self, time_ms: int) -> bool:
+        return self.start_ms <= time_ms <= self.end_ms

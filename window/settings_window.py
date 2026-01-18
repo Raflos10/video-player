@@ -1,20 +1,16 @@
 from typing import cast
-from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6 import QtWidgets, QtGui
 
-from setting_keys import SettingKeys, DEFAULTS
+from setting_keys import SettingKeys
+from settings_manager import settings_manager
 
 
 class SettingsWindow(QtWidgets.QDialog):
-
-    settings_updated = QtCore.Signal()
-
-    def __init__(self, settings: QtCore.QSettings, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Settings")
         self.setModal(True)
         self.resize(400, 300)
-
-        self.settings = settings
 
         # Main layout
         layout = QtWidgets.QVBoxLayout(self)
@@ -74,51 +70,85 @@ class SettingsWindow(QtWidgets.QDialog):
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
 
-        # Load settings
-        self.load_settings()
+        self.refresh_ui()
+        self.connect_signals()
 
-    def load_settings(self):
-        show_menu_bar = self.settings.value(SettingKeys.SHOW_MENU_BAR, DEFAULTS[SettingKeys.SHOW_MENU_BAR])
+    def connect_signals(self):
+        settings_manager.settings_changed.connect(self.on_settings_changed)
+
+    def on_settings_changed(self):
+        self.refresh_ui()
+
+    def refresh_ui(self):
+        show_menu_bar = settings_manager.value(SettingKeys.SHOW_MENU_BAR)
         self.show_menu_bar_checkbox.setChecked(bool(show_menu_bar))
 
-        enable_subtitles = self.settings.value(SettingKeys.ENABLE_SUBTITLES, DEFAULTS[SettingKeys.ENABLE_SUBTITLES])
+        enable_subtitles = settings_manager.value(SettingKeys.ENABLE_SUBTITLES)
         self.enable_subtitles_checkbox.setChecked(bool(enable_subtitles))
 
-        subtitle_font_size = self.settings.value(SettingKeys.SUBTITLE_FONT_SIZE, DEFAULTS[SettingKeys.SUBTITLE_FONT_SIZE])
+        subtitle_font_size = settings_manager.value(SettingKeys.SUBTITLE_FONT_SIZE)
         self.subtitle_font_spinbox.setValue(int(cast(int, subtitle_font_size)))
 
-        seek_step = self.settings.value(SettingKeys.SEEK_STEP, DEFAULTS[SettingKeys.SEEK_STEP])
+        seek_step = settings_manager.value(SettingKeys.SEEK_STEP)
         self.seek_step_spinbox.setValue(int(cast(int, seek_step)))
 
-        save_position = self.settings.value(SettingKeys.SAVE_POSITION_ON_EXIT,
-                                              DEFAULTS[SettingKeys.SAVE_POSITION_ON_EXIT])
+        save_position = settings_manager.value(SettingKeys.SAVE_POSITION_ON_EXIT)
         self.save_position_checkbox.setChecked(bool(save_position))
 
-        play_pause_shortcut = self.settings.value(SettingKeys.PLAY_PAUSE_SHORTCUT, DEFAULTS[SettingKeys.PLAY_PAUSE_SHORTCUT])
-        self.play_pause_edit.setKeySequence(QtGui.QKeySequence.fromString(str(play_pause_shortcut)))
+        play_pause_shortcut = settings_manager.value(SettingKeys.PLAY_PAUSE_SHORTCUT)
+        self.play_pause_edit.setKeySequence(
+            QtGui.QKeySequence.fromString(str(play_pause_shortcut))
+        )
 
-        seek_forward_shortcut = self.settings.value(SettingKeys.SEEK_FORWARD_SHORTCUT, DEFAULTS[SettingKeys.SEEK_FORWARD_SHORTCUT])
-        self.seek_forward_edit.setKeySequence(QtGui.QKeySequence.fromString(str(seek_forward_shortcut)))
+        seek_forward_shortcut = settings_manager.value(
+            SettingKeys.SEEK_FORWARD_SHORTCUT
+        )
+        self.seek_forward_edit.setKeySequence(
+            QtGui.QKeySequence.fromString(str(seek_forward_shortcut))
+        )
 
-        seek_backward_shortcut = self.settings.value(SettingKeys.SEEK_BACKWARD_SHORTCUT, DEFAULTS[SettingKeys.SEEK_BACKWARD_SHORTCUT])
-        self.seek_backward_edit.setKeySequence(QtGui.QKeySequence.fromString(str(seek_backward_shortcut)))
+        seek_backward_shortcut = settings_manager.value(
+            SettingKeys.SEEK_BACKWARD_SHORTCUT
+        )
+        self.seek_backward_edit.setKeySequence(
+            QtGui.QKeySequence.fromString(str(seek_backward_shortcut))
+        )
 
-        fullscreen_shortcut = self.settings.value(SettingKeys.FULLSCREEN_SHORTCUT, DEFAULTS[SettingKeys.FULLSCREEN_SHORTCUT])
-        self.fullscreen_edit.setKeySequence(QtGui.QKeySequence.fromString(str(fullscreen_shortcut)))
-
-    def save_settings(self):
-        self.settings.setValue(SettingKeys.SHOW_MENU_BAR, self.show_menu_bar_checkbox.isChecked())
-        self.settings.setValue(SettingKeys.ENABLE_SUBTITLES, self.enable_subtitles_checkbox.isChecked())
-        self.settings.setValue(SettingKeys.SUBTITLE_FONT_SIZE, self.subtitle_font_spinbox.value())
-        self.settings.setValue(SettingKeys.SEEK_STEP, self.seek_step_spinbox.value())
-        self.settings.setValue(SettingKeys.SAVE_POSITION_ON_EXIT, self.save_position_checkbox.isChecked())
-        self.settings.setValue(SettingKeys.PLAY_PAUSE_SHORTCUT, self.play_pause_edit.keySequence().toString())
-        self.settings.setValue(SettingKeys.SEEK_FORWARD_SHORTCUT, self.seek_forward_edit.keySequence().toString())
-        self.settings.setValue(SettingKeys.SEEK_BACKWARD_SHORTCUT, self.seek_backward_edit.keySequence().toString())
-        self.settings.setValue(SettingKeys.FULLSCREEN_SHORTCUT, self.fullscreen_edit.keySequence().toString())
-        self.settings.sync()
+        fullscreen_shortcut = settings_manager.value(SettingKeys.FULLSCREEN_SHORTCUT)
+        self.fullscreen_edit.setKeySequence(
+            QtGui.QKeySequence.fromString(str(fullscreen_shortcut))
+        )
 
     def accept(self):
-        self.save_settings()
-        self.settings_updated.emit()
+        settings_manager.set_value(
+            SettingKeys.SHOW_MENU_BAR, self.show_menu_bar_checkbox.isChecked()
+        )
+        settings_manager.set_value(
+            SettingKeys.ENABLE_SUBTITLES, self.enable_subtitles_checkbox.isChecked()
+        )
+        settings_manager.set_value(
+            SettingKeys.SUBTITLE_FONT_SIZE, self.subtitle_font_spinbox.value()
+        )
+        settings_manager.set_value(
+            SettingKeys.SEEK_STEP, self.seek_step_spinbox.value()
+        )
+        settings_manager.set_value(
+            SettingKeys.SAVE_POSITION_ON_EXIT, self.save_position_checkbox.isChecked()
+        )
+        settings_manager.set_value(
+            SettingKeys.PLAY_PAUSE_SHORTCUT,
+            self.play_pause_edit.keySequence().toString(),
+        )
+        settings_manager.set_value(
+            SettingKeys.SEEK_FORWARD_SHORTCUT,
+            self.seek_forward_edit.keySequence().toString(),
+        )
+        settings_manager.set_value(
+            SettingKeys.SEEK_BACKWARD_SHORTCUT,
+            self.seek_backward_edit.keySequence().toString(),
+        )
+        settings_manager.set_value(
+            SettingKeys.FULLSCREEN_SHORTCUT,
+            self.fullscreen_edit.keySequence().toString(),
+        )
         super().accept()

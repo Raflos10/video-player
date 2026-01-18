@@ -1,7 +1,8 @@
 from typing import Optional
 
 from PySide6 import QtWidgets, QtGui, QtCore
-from setting_keys import SettingKeys, DEFAULTS
+from setting_keys import SettingKeys
+from settings_manager import settings_manager
 
 
 class SubtitleGraphicsItem(QtWidgets.QGraphicsTextItem):
@@ -10,22 +11,31 @@ class SubtitleGraphicsItem(QtWidgets.QGraphicsTextItem):
         self.setVisible(False)
         self.update_subtitle_style()
 
+        self.connect_signals()
+
+    def connect_signals(self):
+        settings_manager.settings_changed.connect(self.on_settings_changed)
+
     def set_text(self, text: Optional[str]):
         self.setPlainText(text)
         self.setVisible(bool(text))
 
-    def update_subtitle_style(self, settings=None):
-        if settings is None:
-            settings = DEFAULTS
+    def on_settings_changed(self, key: str):
+        if key == SettingKeys.SUBTITLE_FONT_SIZE:
+            self.update_subtitle_style()
 
-        font_size = settings.get(SettingKeys.SUBTITLE_FONT_SIZE, DEFAULTS[SettingKeys.SUBTITLE_FONT_SIZE])
-
+    def update_subtitle_style(self, font_size=None):
         font = self.font()
-        font.setPointSize(font_size)
+
+        if font_size:
+            font.setPointSize(font_size)
+        else:
+            font.setPointSize(int(settings_manager.value(SettingKeys.SUBTITLE_FONT_SIZE)))
+
         font.setBold(True)
         self.setFont(font)
 
-        self.setDefaultTextColor(QtGui.QColor('white'))
+        self.setDefaultTextColor(QtGui.QColor("white"))
 
     def paint(self, painter, option, widget=None):
         painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
