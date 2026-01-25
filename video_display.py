@@ -76,7 +76,6 @@ class VideoDisplay(QtWidgets.QGraphicsView):
         self.current_subtitle_entries = entries
         entry = entries[0]
         self.subtitle_item.setPlainText(entry.text)
-        self.subtitle_item.setVisible(True)
         self.update_scene_rect()
 
     def set_media_status(self, status):
@@ -88,10 +87,16 @@ class VideoDisplay(QtWidgets.QGraphicsView):
     def update_scene_rect(self):
         self.graphics_scene.setSceneRect(0, 0, self.width(), self.height())
         self.video_item.setSize(QtCore.QSizeF(self.width(), self.height()))
+
         center_x = self.width() / 2
         center_y = self.height() / 2
+
         self.center_text.setPos(center_x - self.center_text.boundingRect().width() / 2,
                                 center_y - self.center_text.boundingRect().height() / 2)
+
+        subtitle_max_width = self.width() * 0.9
+        self.subtitle_item.setTextWidth(subtitle_max_width)
+
         self.subtitle_item.setPos(center_x - self.subtitle_item.boundingRect().width() / 2,
                                   self.height() - self.subtitle_item.boundingRect().height() - 20)
         # self.busyProxy.setPos(center_x - self.busyProxy.boundingRect().width() / 2, center_y - self.busyProxy.boundingRect().height() / 2)

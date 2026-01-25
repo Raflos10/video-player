@@ -1,13 +1,16 @@
 from typing import Optional
 
-from PySide6 import QtWidgets, QtGui, QtCore
+from PySide6 import QtCore
+
+from primitive.graphics_outlined_text_item import GraphicsOutlinedTextItem
 from setting_keys import SettingKeys
 from settings_manager import settings_manager
 
 
-class SubtitleGraphicsItem(QtWidgets.QGraphicsTextItem):
+class SubtitleGraphicsItem(GraphicsOutlinedTextItem):
     def __init__(self):
         super().__init__()
+
         self.setVisible(False)
         self.update_subtitle_style()
 
@@ -16,8 +19,8 @@ class SubtitleGraphicsItem(QtWidgets.QGraphicsTextItem):
     def connect_signals(self):
         settings_manager.settings_changed.connect(self.on_settings_changed)
 
-    def set_text(self, text: Optional[str]):
-        self.setPlainText(text)
+    def setPlainText(self, text: Optional[str]):
+        super().setPlainText(text)
         self.setVisible(bool(text))
 
     def on_settings_changed(self, key: str):
@@ -27,6 +30,10 @@ class SubtitleGraphicsItem(QtWidgets.QGraphicsTextItem):
     def update_subtitle_style(self, font_size=None):
         font = self.font()
 
+        text_option = self.document().defaultTextOption()
+        text_option.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.document().setDefaultTextOption(text_option)
+
         if font_size:
             font.setPointSize(font_size)
         else:
@@ -35,18 +42,5 @@ class SubtitleGraphicsItem(QtWidgets.QGraphicsTextItem):
         font.setBold(True)
         self.setFont(font)
 
-        self.setDefaultTextColor(QtGui.QColor("white"))
-
-    def paint(self, painter, option, widget=None):
-        painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
-
-        path = QtGui.QPainterPath()
-        path.addText(0, 0, self.font(), self.toPlainText())
-
-        painter.setPen(QtGui.QPen(QtCore.Qt.GlobalColor.black, 5))
-        painter.setBrush(QtCore.Qt.BrushStyle.NoBrush)
-        painter.drawPath(path)
-
-        painter.setPen(QtCore.Qt.PenStyle.NoPen)
-        painter.setBrush(QtCore.Qt.GlobalColor.white)
-        painter.drawPath(path)
+        if self.toPlainText():
+            self.apply_outline_format()
