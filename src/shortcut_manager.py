@@ -1,6 +1,6 @@
 from utils.helpers import setup_shortcuts
-from setting_keys import SettingKeys
-from settings_manager import settings_manager
+from settings.setting_keys import SettingKeys
+from settings.settings_manager import settings_manager
 
 
 class ShortcutManager:

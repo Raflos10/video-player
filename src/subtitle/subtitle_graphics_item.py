@@ -3,8 +3,8 @@ from typing import Optional
 from PySide6 import QtCore
 
 from primitive.graphics_outlined_text_item import GraphicsOutlinedTextItem
-from setting_keys import SettingKeys
-from settings_manager import settings_manager
+from settings.setting_keys import SettingKeys
+from settings.settings_manager import settings_manager
 
 
 class SubtitleGraphicsItem(GraphicsOutlinedTextItem):

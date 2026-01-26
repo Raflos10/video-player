@@ -1,8 +1,8 @@
 from PySide6 import QtCore, QtWidgets, QtMultimedia, QtMultimediaWidgets, QtGui
 
-from settings_manager import settings_manager
+from settings.settings_manager import settings_manager
 from subtitle.subtitle_graphics_item import SubtitleGraphicsItem
-from setting_keys import SettingKeys
+from settings.setting_keys import SettingKeys
 
 
 class VideoDisplay(QtWidgets.QGraphicsView):
