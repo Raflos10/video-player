@@ -1,13 +1,13 @@
 from PySide6 import QtCore, QtWidgets
 
-from ..main_menu_bar import MainMenuBar
-from ..video_display import VideoDisplay
-from ..video_controls import VideoControls
-from ..media_controller import MediaController
-from ..helpers import open_and_load_file
-from ..shortcut_manager import ShortcutManager
-from ..window.settings_window import SettingsWindow
-from ..window.about_window import AboutDialog
+from main_menu_bar import MainMenuBar
+from video_display import VideoDisplay
+from video_controls import VideoControls
+from media_controller import MediaController
+from helpers import open_and_load_file
+from shortcut_manager import ShortcutManager
+from settings_window import SettingsWindow
+from about_window import AboutDialog
 
 
 class ApplicationWindow(QtWidgets.QMainWindow):
