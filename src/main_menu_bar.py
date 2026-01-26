@@ -32,11 +32,11 @@ class MainMenuBar(QtWidgets.QMenuBar):
         exit_action.triggered.connect(QtWidgets.QApplication.quit)
 
     def connect_signals(
-            self,
-            file_dialog_handler,
-            toggle_fullscreen_handler,
-            settings_handler,
-            about_handler,
+        self,
+        file_dialog_handler,
+        toggle_fullscreen_handler,
+        settings_handler,
+        about_handler,
     ):
         settings_manager.settings_changed.connect(self.on_settings_changed)
 

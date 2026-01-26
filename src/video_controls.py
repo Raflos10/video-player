@@ -57,12 +57,18 @@ class VideoControls(QtWidgets.QWidget):
 
     def connect_signals(self, media_controller):
         self.seek_slider.sliderReleased.connect(
-            lambda: media_controller.mediaPlayer.setPosition(self.seek_slider.value()))
+            lambda: media_controller.mediaPlayer.setPosition(self.seek_slider.value())
+        )
         self.play_button.clicked.connect(media_controller.toggle_playback)
         self.stop_button.clicked.connect(lambda: media_controller.mediaPlayer.stop())
-        self.volume_slider.valueChanged.connect(lambda v: media_controller.audioOutput.setVolume(v / 100.0))
+        self.volume_slider.valueChanged.connect(
+            lambda v: media_controller.audioOutput.setVolume(v / 100.0)
+        )
         self.mute_button.clicked.connect(
-            lambda: media_controller.audioOutput.setMuted(not media_controller.audioOutput.isMuted()))
+            lambda: media_controller.audioOutput.setMuted(
+                not media_controller.audioOutput.isMuted()
+            )
+        )
 
     def set_current_time(self, time):
         self.current_time_label.setText(format_time(time))

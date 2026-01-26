@@ -14,14 +14,24 @@ class MediaController:
         self.subtitles = None
 
     def connect_signals(self, video_controls, video_display):
-        self.mediaPlayer.mediaStatusChanged.connect(lambda status: video_display.set_media_status(status))
-        self.mediaPlayer.positionChanged.connect(lambda pos: video_display.update_subtitle(pos, self.subtitles))
-        self.mediaPlayer.positionChanged.connect(lambda pos: video_controls.set_current_time(pos / 1000))
-        self.mediaPlayer.durationChanged.connect(lambda dur: video_controls.set_duration(dur / 1000))
-        self.mediaPlayer.playbackStateChanged.connect(
-            lambda status: video_controls.set_playback_status(status))
         self.mediaPlayer.mediaStatusChanged.connect(
-            lambda status: video_controls.set_enabled(self.is_media_loaded(status)))
+            lambda status: video_display.set_media_status(status)
+        )
+        self.mediaPlayer.positionChanged.connect(
+            lambda pos: video_display.update_subtitle(pos, self.subtitles)
+        )
+        self.mediaPlayer.positionChanged.connect(
+            lambda pos: video_controls.set_current_time(pos / 1000)
+        )
+        self.mediaPlayer.durationChanged.connect(
+            lambda dur: video_controls.set_duration(dur / 1000)
+        )
+        self.mediaPlayer.playbackStateChanged.connect(
+            lambda status: video_controls.set_playback_status(status)
+        )
+        self.mediaPlayer.mediaStatusChanged.connect(
+            lambda status: video_controls.set_enabled(self.is_media_loaded(status))
+        )
 
     def load_media(self, file_path):
         self.mediaPlayer.setSource(QtCore.QUrl.fromLocalFile(file_path))
@@ -31,7 +41,10 @@ class MediaController:
         self.mediaPlayer.play()
 
     def toggle_playback(self):
-        if self.mediaPlayer.playbackState() == QtMultimedia.QMediaPlayer.PlaybackState.PlayingState:
+        if (
+            self.mediaPlayer.playbackState()
+            == QtMultimedia.QMediaPlayer.PlaybackState.PlayingState
+        ):
             self.mediaPlayer.pause()
         else:
             self.mediaPlayer.play()
@@ -39,5 +52,7 @@ class MediaController:
     @staticmethod
     def is_media_loaded(status):
         return status in (
-            QtMultimedia.QMediaPlayer.MediaStatus.LoadedMedia, QtMultimedia.QMediaPlayer.MediaStatus.BufferedMedia,
-            QtMultimedia.QMediaPlayer.MediaStatus.BufferingMedia)
+            QtMultimedia.QMediaPlayer.MediaStatus.LoadedMedia,
+            QtMultimedia.QMediaPlayer.MediaStatus.BufferedMedia,
+            QtMultimedia.QMediaPlayer.MediaStatus.BufferingMedia,
+        )

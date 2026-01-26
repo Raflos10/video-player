@@ -13,7 +13,9 @@ class VideoDisplay(QtWidgets.QGraphicsView):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.mediaStatus = QtMultimedia.QMediaPlayer.MediaStatus.NoMedia  # TODO: is it necessary?
+        self.mediaStatus = (
+            QtMultimedia.QMediaPlayer.MediaStatus.NoMedia
+        )  # TODO: is it necessary?
 
         self.graphics_scene = QtWidgets.QGraphicsScene(self)
         self.setScene(self.graphics_scene)
@@ -81,7 +83,9 @@ class VideoDisplay(QtWidgets.QGraphicsView):
     def set_media_status(self, status):
         self.mediaStatus = status
         # self.busyProxy.setVisible(status == QtMultimedia.QMediaPlayer.MediaStatus.LoadingMedia)
-        self.center_text.setVisible(status == QtMultimedia.QMediaPlayer.MediaStatus.NoMedia)
+        self.center_text.setVisible(
+            status == QtMultimedia.QMediaPlayer.MediaStatus.NoMedia
+        )
         self.update_scene_rect()
 
     def update_scene_rect(self):
@@ -91,14 +95,18 @@ class VideoDisplay(QtWidgets.QGraphicsView):
         center_x = self.width() / 2
         center_y = self.height() / 2
 
-        self.center_text.setPos(center_x - self.center_text.boundingRect().width() / 2,
-                                center_y - self.center_text.boundingRect().height() / 2)
+        self.center_text.setPos(
+            center_x - self.center_text.boundingRect().width() / 2,
+            center_y - self.center_text.boundingRect().height() / 2,
+        )
 
         subtitle_max_width = self.width() * 0.9
         self.subtitle_item.setTextWidth(subtitle_max_width)
 
-        self.subtitle_item.setPos(center_x - self.subtitle_item.boundingRect().width() / 2,
-                                  self.height() - self.subtitle_item.boundingRect().height() - 20)
+        self.subtitle_item.setPos(
+            center_x - self.subtitle_item.boundingRect().width() / 2,
+            self.height() - self.subtitle_item.boundingRect().height() - 20,
+        )
         # self.busyProxy.setPos(center_x - self.busyProxy.boundingRect().width() / 2, center_y - self.busyProxy.boundingRect().height() / 2)
 
     def mousePressEvent(self, event):
