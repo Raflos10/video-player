@@ -2,7 +2,7 @@ import sys
 from PySide6 import QtWidgets
 
 from window.application_window import ApplicationWindow
-from audio_check import check_audio_with_prompt
+from utils.audio_check import check_audio_with_prompt
 from theme import Theme
 
 if __name__ == "__main__":

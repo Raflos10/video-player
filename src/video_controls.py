@@ -1,6 +1,6 @@
 from PySide6 import QtCore, QtWidgets, QtMultimedia
 from primitive.slider import ClickableSlider
-from helpers import format_time
+from utils.helpers import format_time
 
 
 class VideoControls(QtWidgets.QWidget):

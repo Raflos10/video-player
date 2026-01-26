@@ -1,6 +1,4 @@
-from PySide6 import QtCore
-
-from helpers import setup_shortcuts
+from utils.helpers import setup_shortcuts
 from setting_keys import SettingKeys
 from settings_manager import settings_manager
 
