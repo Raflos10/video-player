@@ -71,13 +71,6 @@ class SettingsWindow(QtWidgets.QDialog):
         layout.addWidget(button_box)
 
         self.refresh_ui()
-        self.connect_signals()
-
-    def connect_signals(self):
-        settings_manager.settings_changed.connect(self.on_settings_changed)
-
-    def on_settings_changed(self):
-        self.refresh_ui()
 
     def refresh_ui(self):
         show_menu_bar = settings_manager.value(SettingKeys.SHOW_MENU_BAR)

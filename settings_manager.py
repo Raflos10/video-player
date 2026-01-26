@@ -11,13 +11,14 @@ class SettingsManager(QtCore.QObject):
         self.settings = QtCore.QSettings()
 
     def set_value(self, key: str, value):
-        old_value = self.settings.value(key)
-        if old_value != value:
+        current_value = self.value(key)
+        if current_value != value:
             self.settings.setValue(key, value)
             self.settings_changed.emit(key, value)
 
     def value(self, key: str):
-        return self.settings.value(key, DEFAULTS[key])
+        default_value = DEFAULTS[key]
+        return self.settings.value(key, DEFAULTS[key], type=type(default_value))
 
 
 # Global singleton
