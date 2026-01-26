@@ -1,8 +1,8 @@
 from PySide6 import QtCore, QtWidgets
 
-from main_menu_bar import MainMenuBar
-from video_display import VideoDisplay
-from video_controls import VideoControls
+from widgets.main_menu_bar import MainMenuBar
+from widgets.video_display import VideoDisplay
+from widgets.video_controls import VideoControls
 from media_controller import MediaController
 from utils.helpers import open_and_load_file
 from shortcut_manager import ShortcutManager
