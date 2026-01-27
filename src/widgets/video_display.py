@@ -46,9 +46,11 @@ class VideoDisplay(QtWidgets.QGraphicsView):
         self.video_item.setZValue(0)
         self.center_text.setZValue(1)
         self.subtitle_item.setZValue(2)
-        # self.busyProxy.setZValue(3)
 
-        self.setMouseTracking(True)
+        self.cursor_hide_timer = QtCore.QTimer(self)
+        self.cursor_hide_timer.timeout.connect(self.hide_cursor)
+        self.cursor_hide_timer.setSingleShot(True)
+        self.cursor_visible = True
 
     def connect_signals(self, media_controller, toggle_fullscreen, file_dialog_handler):
         settings_manager.settings_changed.connect(self.on_settings_changed)
@@ -82,7 +84,6 @@ class VideoDisplay(QtWidgets.QGraphicsView):
 
     def set_media_status(self, status):
         self.mediaStatus = status
-        # self.busyProxy.setVisible(status == QtMultimedia.QMediaPlayer.MediaStatus.LoadingMedia)
         self.center_text.setVisible(
             status == QtMultimedia.QMediaPlayer.MediaStatus.NoMedia
         )
@@ -111,7 +112,27 @@ class VideoDisplay(QtWidgets.QGraphicsView):
 
         # self.busyProxy.setPos(center_x - self.busyProxy.boundingRect().width() / 2, center_y - self.busyProxy.boundingRect().height() / 2)
 
+    def hide_cursor(self):
+        self.setCursor(QtCore.Qt.CursorShape.BlankCursor)
+        self.cursor_visible = False
+
+    def show_cursor(self):
+        self.unsetCursor()
+        self.cursor_visible = True
+
+    def restart_cursor_timer(self):
+        if not self.cursor_visible:
+            self.show_cursor()
+
+        self.cursor_hide_timer.start(3000)
+
+    def mouseMoveEvent(self, event):
+        self.restart_cursor_timer()
+        super().mouseMoveEvent(event)
+
     def mousePressEvent(self, event):
+        self.restart_cursor_timer()
+
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
             if self.mediaStatus == QtMultimedia.QMediaPlayer.MediaStatus.NoMedia:
                 self.fileDialogRequested.emit()
@@ -120,9 +141,21 @@ class VideoDisplay(QtWidgets.QGraphicsView):
         super().mousePressEvent(event)
 
     def mouseDoubleClickEvent(self, event):
+        self.restart_cursor_timer()
+
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
             self.fullscreenToggled.emit()
         super().mouseDoubleClickEvent(event)
+
+    def enterEvent(self, event):
+        self.restart_cursor_timer()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.cursor_hide_timer.stop()
+        if not self.cursor_visible:
+            self.show_cursor()
+        super().leaveEvent(event)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
