@@ -7,8 +7,6 @@ from theme import Theme
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
-    app.setOrganizationName("VideoPlayer")
-    app.setApplicationName("VideoPlayer")
     app.setStyleSheet(Theme.DARK)
 
     if not check_audio_with_prompt():

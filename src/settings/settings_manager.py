@@ -8,7 +8,7 @@ class SettingsManager(QtCore.QObject):
 
     def __init__(self):
         super().__init__()
-        self.settings = QtCore.QSettings()
+        self.settings = QtCore.QSettings("VideoPlayer", "VideoPlayer")
 
     def set_value(self, key: str, value):
         current_value = self.value(key)
