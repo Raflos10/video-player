@@ -1,5 +1,5 @@
-from PyQt6.QtCore import QPoint
 from PySide6 import QtCore, QtWidgets, QtMultimedia
+from PySide6.QtCore import QPoint
 
 from media_controller import MediaController
 from primitive.slider import ClickableSlider
