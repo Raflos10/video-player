@@ -12,3 +12,7 @@ dependencies = [
 
 [project.scripts]
 video-player = "src.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
