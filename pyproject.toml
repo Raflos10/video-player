@@ -15,4 +15,6 @@ untitled-video-player = "main:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-py-modules = ["main"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
