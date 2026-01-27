@@ -16,6 +16,8 @@ class ShortcutManager:
             SettingKeys.PLAY_PAUSE_SHORTCUT,
             SettingKeys.SEEK_FORWARD_SHORTCUT,
             SettingKeys.SEEK_BACKWARD_SHORTCUT,
+            SettingKeys.TOGGLE_MUTE_SHORTCUT,
             SettingKeys.FULLSCREEN_SHORTCUT,
+            SettingKeys.TOGGLE_SUBTITLES_SHORTCUT,
         ]:
             setup_shortcuts(self.window)

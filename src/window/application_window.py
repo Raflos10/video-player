@@ -28,7 +28,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.main_layout = MainLayout(self, self.video_display, self.video_controls, self.isFullScreen())
         self.setCentralWidget(self.main_layout)
 
-        self.mediaController = MediaController(self.video_display.video_item)
+        self.media_controller = MediaController(self.video_display.video_item)
 
         self.settings_window = SettingsWindow(self)
         self.about_dialog = AboutDialog(self)
@@ -38,18 +38,18 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.connect_signals()
 
         if file_path:
-            self.mediaController.load_media(file_path)
+            self.media_controller.load_media(file_path)
 
     def connect_signals(self):
         self.shortcut_manager.connect_signals()
-        self.mediaController.connect_signals(self.video_controls, self.video_display)
-        self.video_controls.connect_signals(self.mediaController)
+        self.media_controller.connect_signals(self.video_controls, self.video_display)
+        self.video_controls.connect_signals(self.media_controller)
 
         file_dialog_handler = lambda: open_and_load_file(
-            self, lambda file_path: self.mediaController.load_media(file_path)
+            self, lambda file_path: self.media_controller.load_media(file_path)
         )
         self.video_display.connect_signals(
-            self.mediaController, self.toggle_fullscreen, file_dialog_handler
+            self.media_controller, self.toggle_fullscreen, file_dialog_handler
         )
         self.menu_bar.connect_signals(
             file_dialog_handler,
