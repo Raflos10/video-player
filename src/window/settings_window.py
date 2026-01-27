@@ -56,19 +56,56 @@ class SettingsWindow(QtWidgets.QDialog):
 
         # Keyboard Shortcuts tab
         keyboard_tab = QtWidgets.QWidget()
-        keyboard_layout = QtWidgets.QFormLayout(keyboard_tab)
+        keyboard_main_layout = QtWidgets.QVBoxLayout(keyboard_tab)
+
+        # Instructions
+        instructions = QtWidgets.QLabel(
+            "Click on a field and press the desired key combination.\n"
+            "Press Backspace or Delete to clear a shortcut."
+        )
+        instructions.setWordWrap(True)
+        instructions.setStyleSheet("color: gray; margin-bottom: 10px;")
+        keyboard_main_layout.addWidget(instructions)
+
+        # Shortcuts form
+        keyboard_layout = QtWidgets.QFormLayout()
+        keyboard_layout.setFieldGrowthPolicy(
+            QtWidgets.QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow
+        )
+
         self.play_pause_edit = QtWidgets.QKeySequenceEdit()
+        self.play_pause_edit.setClearButtonEnabled(True)
+
         self.seek_forward_edit = QtWidgets.QKeySequenceEdit()
+        self.seek_forward_edit.setClearButtonEnabled(True)
+
         self.seek_backward_edit = QtWidgets.QKeySequenceEdit()
+        self.seek_backward_edit.setClearButtonEnabled(True)
+
         self.toggle_mute_edit = QtWidgets.QKeySequenceEdit()
+        self.toggle_mute_edit.setClearButtonEnabled(True)
+
         self.fullscreen_edit = QtWidgets.QKeySequenceEdit()
+        self.fullscreen_edit.setClearButtonEnabled(True)
+
         self.toggle_subtitles_edit = QtWidgets.QKeySequenceEdit()
+        self.toggle_subtitles_edit.setClearButtonEnabled(True)
+
         keyboard_layout.addRow("Play/Pause:", self.play_pause_edit)
         keyboard_layout.addRow("Seek Forward:", self.seek_forward_edit)
         keyboard_layout.addRow("Seek Backward:", self.seek_backward_edit)
         keyboard_layout.addRow("Toggle Mute:", self.toggle_mute_edit)
         keyboard_layout.addRow("Toggle Fullscreen:", self.fullscreen_edit)
         keyboard_layout.addRow("Toggle Subtitles:", self.toggle_subtitles_edit)
+
+        keyboard_main_layout.addLayout(keyboard_layout)
+        keyboard_main_layout.addStretch()
+
+        # Reset to defaults button
+        reset_shortcuts_btn = QtWidgets.QPushButton("Reset to Defaults")
+        reset_shortcuts_btn.clicked.connect(self.reset_shortcuts_to_defaults)
+        keyboard_main_layout.addWidget(reset_shortcuts_btn)
+
         self.tab_widget.addTab(keyboard_tab, "Keyboard Shortcuts")
 
         # Buttons
@@ -133,6 +170,25 @@ class SettingsWindow(QtWidgets.QDialog):
         self.toggle_subtitles_edit.setKeySequence(
             QtGui.QKeySequence.fromString(str(toggle_subtitles_shortcut))
         )
+
+    def reset_shortcuts_to_defaults(self):
+        """Reset all keyboard shortcuts to their default values."""
+        # Define default shortcuts - adjust these to match your application's defaults
+        defaults = {
+            'play_pause': 'Space',
+            'seek_forward': 'Right',
+            'seek_backward': 'Left',
+            'toggle_mute': 'M',
+            'fullscreen': 'F',
+            'toggle_subtitles': 'S'
+        }
+
+        self.play_pause_edit.setKeySequence(QtGui.QKeySequence.fromString(defaults['play_pause']))
+        self.seek_forward_edit.setKeySequence(QtGui.QKeySequence.fromString(defaults['seek_forward']))
+        self.seek_backward_edit.setKeySequence(QtGui.QKeySequence.fromString(defaults['seek_backward']))
+        self.toggle_mute_edit.setKeySequence(QtGui.QKeySequence.fromString(defaults['toggle_mute']))
+        self.fullscreen_edit.setKeySequence(QtGui.QKeySequence.fromString(defaults['fullscreen']))
+        self.toggle_subtitles_edit.setKeySequence(QtGui.QKeySequence.fromString(defaults['toggle_subtitles']))
 
     def accept(self):
         settings_manager.set_value(
