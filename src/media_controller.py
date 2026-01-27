@@ -32,6 +32,7 @@ class MediaController:
         self.mediaPlayer.mediaStatusChanged.connect(
             lambda status: video_controls.set_enabled(self.is_media_loaded(status))
         )
+        self.audioOutput.mutedChanged.connect(video_controls.set_muted_value)
 
     def load_media(self, file_path):
         self.mediaPlayer.setSource(QtCore.QUrl.fromLocalFile(file_path))
