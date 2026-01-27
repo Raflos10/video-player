@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "video-player"
+version = "2026.0.0a1"
+readme = "README.md"
+dependencies = [
+    "PySide6",
+]
+
+[project.scripts]
+video-player = "src.main:main"
