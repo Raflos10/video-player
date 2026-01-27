@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "video-player"
+name = "untitled-video-player"
 version = "2026.0.0a1"
 readme = "README.md"
 dependencies = [
@@ -11,8 +11,10 @@ dependencies = [
 ]
 
 [project.scripts]
-video-player = "src.main:main"
+untitled-video-player = "main:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["src*"]
+where = ["src"]
