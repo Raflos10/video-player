@@ -26,12 +26,18 @@ class SettingsWindow(QtWidgets.QDialog):
         appearance_layout.addWidget(self.show_menu_bar_checkbox)
         self.enable_subtitles_checkbox = QtWidgets.QCheckBox("Enable Subtitles")
         appearance_layout.addWidget(self.enable_subtitles_checkbox)
-        subtitle_font_layout = QtWidgets.QHBoxLayout()
-        subtitle_font_layout.addWidget(QtWidgets.QLabel("Subtitle Font Size:"))
-        self.subtitle_font_spinbox = QtWidgets.QSpinBox()
-        self.subtitle_font_spinbox.setRange(12, 48)
-        subtitle_font_layout.addWidget(self.subtitle_font_spinbox)
-        appearance_layout.addLayout(subtitle_font_layout)
+
+        # Subtitle font scale (percentage of screen height)
+        subtitle_scale_layout = QtWidgets.QHBoxLayout()
+        subtitle_scale_layout.addWidget(QtWidgets.QLabel("Subtitle Size (% of screen):"))
+        self.subtitle_scale_spinbox = QtWidgets.QDoubleSpinBox()
+        self.subtitle_scale_spinbox.setRange(3.0, 5.0)
+        self.subtitle_scale_spinbox.setSingleStep(0.1)
+        self.subtitle_scale_spinbox.setDecimals(1)
+        self.subtitle_scale_spinbox.setSuffix("%")
+        subtitle_scale_layout.addWidget(self.subtitle_scale_spinbox)
+        appearance_layout.addLayout(subtitle_scale_layout)
+
         appearance_layout.addStretch()
         self.tab_widget.addTab(appearance_tab, "Appearance")
 
@@ -79,8 +85,8 @@ class SettingsWindow(QtWidgets.QDialog):
         enable_subtitles = settings_manager.value(SettingKeys.ENABLE_SUBTITLES)
         self.enable_subtitles_checkbox.setChecked(bool(enable_subtitles))
 
-        subtitle_font_size = settings_manager.value(SettingKeys.SUBTITLE_FONT_SIZE)
-        self.subtitle_font_spinbox.setValue(int(cast(int, subtitle_font_size)))
+        subtitle_font_scale = settings_manager.value(SettingKeys.SUBTITLE_FONT_SCALE)
+        self.subtitle_scale_spinbox.setValue(float(subtitle_font_scale))
 
         seek_step = settings_manager.value(SettingKeys.SEEK_STEP)
         self.seek_step_spinbox.setValue(int(cast(int, seek_step)))
@@ -120,7 +126,7 @@ class SettingsWindow(QtWidgets.QDialog):
             SettingKeys.ENABLE_SUBTITLES, self.enable_subtitles_checkbox.isChecked()
         )
         settings_manager.set_value(
-            SettingKeys.SUBTITLE_FONT_SIZE, self.subtitle_font_spinbox.value()
+            SettingKeys.SUBTITLE_FONT_SCALE, self.subtitle_scale_spinbox.value()
         )
         settings_manager.set_value(
             SettingKeys.SEEK_STEP, self.seek_step_spinbox.value()

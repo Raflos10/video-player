@@ -107,6 +107,8 @@ class VideoDisplay(QtWidgets.QGraphicsView):
             center_x - self.subtitle_item.boundingRect().width() / 2,
             self.height() - self.subtitle_item.boundingRect().height() - 20,
         )
+        self.subtitle_item.set_view_height(self.height())
+
         # self.busyProxy.setPos(center_x - self.busyProxy.boundingRect().width() / 2, center_y - self.busyProxy.boundingRect().height() / 2)
 
     def mousePressEvent(self, event):

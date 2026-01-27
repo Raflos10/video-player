@@ -8,6 +8,7 @@ class SettingKeys:
     FULLSCREEN_SHORTCUT = "shortcuts/fullscreen"
     ENABLE_SUBTITLES = "subtitles/enable"
     SUBTITLE_FONT_SIZE = "subtitles/font_size"
+    SUBTITLE_FONT_SCALE = "subtitles/font_scale"
     SUBTITLE_OUTLINE_SIZE = "subtitles/outline_size"
 
 
@@ -21,5 +22,6 @@ DEFAULTS = {
     SettingKeys.FULLSCREEN_SHORTCUT: "F",
     SettingKeys.ENABLE_SUBTITLES: True,
     SettingKeys.SUBTITLE_FONT_SIZE: 24,
+    SettingKeys.SUBTITLE_FONT_SCALE: 4,
     SettingKeys.SUBTITLE_OUTLINE_SIZE: 5,
 }

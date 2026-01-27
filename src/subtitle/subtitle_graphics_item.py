@@ -12,6 +12,7 @@ class SubtitleGraphicsItem(GraphicsOutlinedTextItem):
         super().__init__()
 
         self.setVisible(False)
+        self._view_height = 600
         self.update_subtitle_style()
 
         self.connect_signals()
@@ -24,8 +25,18 @@ class SubtitleGraphicsItem(GraphicsOutlinedTextItem):
         self.setVisible(bool(text))
 
     def on_settings_changed(self, key: str):
-        if key == SettingKeys.SUBTITLE_FONT_SIZE:
+        if key == SettingKeys.SUBTITLE_FONT_SCALE:
             self.update_subtitle_style()
+
+    def set_view_height(self, height: int):
+        if self._view_height != height:
+            self._view_height = height
+            self.update_subtitle_style()
+
+    def _calculate_font_size(self) -> int:
+        scale = settings_manager.value(SettingKeys.SUBTITLE_FONT_SCALE)
+        calculated_size = int(self._view_height * (scale / 100.0))
+        return max(12, min(calculated_size, 120))
 
     def update_subtitle_style(self, font_size=None):
         font = self.font()
@@ -37,7 +48,7 @@ class SubtitleGraphicsItem(GraphicsOutlinedTextItem):
         if font_size:
             font.setPointSize(font_size)
         else:
-            font.setPointSize(int(settings_manager.value(SettingKeys.SUBTITLE_FONT_SIZE)))
+            font.setPointSize(self._calculate_font_size())
 
         font.setBold(True)
         self.setFont(font)
