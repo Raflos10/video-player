@@ -1,12 +1,14 @@
-from PySide6 import QtWidgets, QtGui
+from PySide6 import QtWidgets, QtGui, QtCore
 
 from settings.setting_keys import SettingKeys
 from settings.settings_manager import settings_manager
 
 
 class MainMenuBar(QtWidgets.QMenuBar):
-    def __init__(self, parent=None):
+    def __init__(self, is_fullscreen: bool, parent=None):
         super().__init__(parent)
+
+        self.is_fullscreen = is_fullscreen
 
         file_menu = self.addMenu("File")
         view_menu = self.addMenu("View")
@@ -32,11 +34,12 @@ class MainMenuBar(QtWidgets.QMenuBar):
         exit_action.triggered.connect(QtWidgets.QApplication.quit)
 
     def connect_signals(
-        self,
-        file_dialog_handler,
-        toggle_fullscreen_handler,
-        settings_handler,
-        about_handler,
+            self,
+            file_dialog_handler,
+            toggle_fullscreen_handler,
+            settings_handler,
+            about_handler,
+            fullscreen_toggled: QtCore.Signal(bool)
     ):
         settings_manager.settings_changed.connect(self.on_settings_changed)
 
@@ -45,6 +48,7 @@ class MainMenuBar(QtWidgets.QMenuBar):
         self.toggle_subtitles_action.triggered.connect(self._toggle_subtitles)
         self.settings_action.triggered.connect(settings_handler)
         self.about_action.triggered.connect(about_handler)
+        fullscreen_toggled.connect(self.on_fullscreen_toggle)
 
     def _toggle_subtitles(self):
         current = settings_manager.value(SettingKeys.ENABLE_SUBTITLES)
@@ -60,3 +64,7 @@ class MainMenuBar(QtWidgets.QMenuBar):
     def refresh_ui(self):
         enable_subtitles = settings_manager.value(SettingKeys.ENABLE_SUBTITLES)
         self.toggle_subtitles_action.setChecked(bool(enable_subtitles))
+
+    def on_fullscreen_toggle(self, is_fullscreen: bool):
+        self.is_fullscreen = is_fullscreen
+        self.setVisible(not is_fullscreen)

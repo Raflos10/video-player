@@ -1,6 +1,6 @@
 from PySide6 import QtCore
 
-from setting_keys import DEFAULTS
+from settings.setting_keys import DEFAULTS
 
 
 class SettingsManager(QtCore.QObject):

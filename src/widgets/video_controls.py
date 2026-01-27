@@ -1,13 +1,21 @@
+from PyQt6.QtCore import QPoint
 from PySide6 import QtCore, QtWidgets, QtMultimedia
+
+from media_controller import MediaController
 from primitive.slider import ClickableSlider
 from utils.helpers import format_time
 
+MOUSE_NEAR_THRESHOLD = 50
 
-class VideoControls(QtWidgets.QWidget):
+
+class VideoControls(QtWidgets.QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
 
         self.setFixedHeight(80)
+
+        self.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
+        self.setStyleSheet("QFrame { background-color: rgb(45, 45, 45); }")
 
         main_layout = QtWidgets.QVBoxLayout(self)
         main_layout.setContentsMargins(10, 10, 10, 10)
@@ -55,7 +63,7 @@ class VideoControls(QtWidgets.QWidget):
 
         self.set_enabled(False)
 
-    def connect_signals(self, media_controller):
+    def connect_signals(self, media_controller: MediaController):
         self.seek_slider.sliderReleased.connect(
             lambda: media_controller.mediaPlayer.setPosition(self.seek_slider.value())
         )
@@ -91,3 +99,6 @@ class VideoControls(QtWidgets.QWidget):
         self.seek_slider.setEnabled(is_enabled)
         self.volume_slider.setEnabled(is_enabled)
         self.mute_button.setEnabled(is_enabled)
+
+    def is_mouse_near(self, mouse_position: QPoint):
+        return mouse_position.y() >= self.y() - MOUSE_NEAR_THRESHOLD
