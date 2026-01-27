@@ -5,7 +5,7 @@ from window.application_window import ApplicationWindow
 from utils.audio_check import check_audio_with_prompt
 from theme import Theme
 
-if __name__ == "__main__":
+def main():
     app = QtWidgets.QApplication([])
     app.setStyleSheet(Theme.DARK)
 
@@ -13,8 +13,13 @@ if __name__ == "__main__":
         sys.exit(1)
 
     file_path = sys.argv[1] if len(sys.argv) > 1 else None
-    mainWindow = ApplicationWindow(file_path)
-    mainWindow.resize(1280, 720)
-    mainWindow.show()
+    main_window = ApplicationWindow(file_path)
+    main_window.resize(1280, 720)
+    main_window.show()
 
     sys.exit(app.exec())
+
+
+
+if __name__ == "__main__":
+    main()
