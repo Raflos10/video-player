@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Video Player
+Comment=A video player desktop application
+Exec=untitled-video-player
+Icon=untitled-video-player
+Terminal=false
+Type=Application
+Categories=AudioVideo;Player;
+MimeType=video/mp4;video/x-matroska;video/webm;video/avi;video/x-msvideo;video/quicktime;
