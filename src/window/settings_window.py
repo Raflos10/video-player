@@ -60,11 +60,15 @@ class SettingsWindow(QtWidgets.QDialog):
         self.play_pause_edit = QtWidgets.QKeySequenceEdit()
         self.seek_forward_edit = QtWidgets.QKeySequenceEdit()
         self.seek_backward_edit = QtWidgets.QKeySequenceEdit()
+        self.toggle_mute_edit = QtWidgets.QKeySequenceEdit()
         self.fullscreen_edit = QtWidgets.QKeySequenceEdit()
+        self.toggle_subtitles_edit = QtWidgets.QKeySequenceEdit()
         keyboard_layout.addRow("Play/Pause:", self.play_pause_edit)
         keyboard_layout.addRow("Seek Forward:", self.seek_forward_edit)
         keyboard_layout.addRow("Seek Backward:", self.seek_backward_edit)
+        keyboard_layout.addRow("Toggle Mute:", self.toggle_mute_edit)
         keyboard_layout.addRow("Toggle Fullscreen:", self.fullscreen_edit)
+        keyboard_layout.addRow("Toggle Subtitles:", self.toggle_subtitles_edit)
         self.tab_widget.addTab(keyboard_tab, "Keyboard Shortcuts")
 
         # Buttons
@@ -113,9 +117,21 @@ class SettingsWindow(QtWidgets.QDialog):
             QtGui.QKeySequence.fromString(str(seek_backward_shortcut))
         )
 
+        toggle_mute_shortcut = settings_manager.value(SettingKeys.TOGGLE_MUTE_SHORTCUT)
+        self.toggle_mute_edit.setKeySequence(
+            QtGui.QKeySequence.fromString(str(toggle_mute_shortcut))
+        )
+
         fullscreen_shortcut = settings_manager.value(SettingKeys.FULLSCREEN_SHORTCUT)
         self.fullscreen_edit.setKeySequence(
             QtGui.QKeySequence.fromString(str(fullscreen_shortcut))
+        )
+
+        toggle_subtitles_shortcut = settings_manager.value(
+            SettingKeys.TOGGLE_SUBTITLES_SHORTCUT
+        )
+        self.toggle_subtitles_edit.setKeySequence(
+            QtGui.QKeySequence.fromString(str(toggle_subtitles_shortcut))
         )
 
     def accept(self):
@@ -147,7 +163,15 @@ class SettingsWindow(QtWidgets.QDialog):
             self.seek_backward_edit.keySequence().toString(),
         )
         settings_manager.set_value(
+            SettingKeys.TOGGLE_MUTE_SHORTCUT,
+            self.toggle_mute_edit.keySequence().toString(),
+        )
+        settings_manager.set_value(
             SettingKeys.FULLSCREEN_SHORTCUT,
             self.fullscreen_edit.keySequence().toString(),
+        )
+        settings_manager.set_value(
+            SettingKeys.TOGGLE_SUBTITLES_SHORTCUT,
+            self.toggle_subtitles_edit.keySequence().toString(),
         )
         super().accept()

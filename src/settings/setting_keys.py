@@ -5,9 +5,10 @@ class SettingKeys:
     PLAY_PAUSE_SHORTCUT = "shortcuts/play_pause"
     SEEK_FORWARD_SHORTCUT = "shortcuts/seek_forward"
     SEEK_BACKWARD_SHORTCUT = "shortcuts/seek_backward"
-    FULLSCREEN_SHORTCUT = "shortcuts/fullscreen"
+    TOGGLE_MUTE_SHORTCUT = "shortcuts/toggle_mute"
+    FULLSCREEN_SHORTCUT = "shortcuts/toggle_fullscreen"
+    TOGGLE_SUBTITLES_SHORTCUT = "shortcuts/toggle_subtitles"
     ENABLE_SUBTITLES = "subtitles/enable"
-    SUBTITLE_FONT_SIZE = "subtitles/font_size"
     SUBTITLE_FONT_SCALE = "subtitles/font_scale"
     SUBTITLE_OUTLINE_SIZE = "subtitles/outline_size"
 
@@ -19,9 +20,10 @@ DEFAULTS = {
     SettingKeys.PLAY_PAUSE_SHORTCUT: "Space",
     SettingKeys.SEEK_FORWARD_SHORTCUT: "Right",
     SettingKeys.SEEK_BACKWARD_SHORTCUT: "Left",
+    SettingKeys.TOGGLE_MUTE_SHORTCUT: "M",
     SettingKeys.FULLSCREEN_SHORTCUT: "F",
+    SettingKeys.TOGGLE_SUBTITLES_SHORTCUT: "S",
     SettingKeys.ENABLE_SUBTITLES: True,
-    SettingKeys.SUBTITLE_FONT_SIZE: 24,
-    SettingKeys.SUBTITLE_FONT_SCALE: 4,
+    SettingKeys.SUBTITLE_FONT_SCALE: 4.0,
     SettingKeys.SUBTITLE_OUTLINE_SIZE: 5,
 }
