@@ -31,7 +31,7 @@ class SettingsWindow(QtWidgets.QDialog):
         subtitle_scale_layout = QtWidgets.QHBoxLayout()
         subtitle_scale_layout.addWidget(QtWidgets.QLabel("Subtitle Size (% of screen):"))
         self.subtitle_scale_spinbox = QtWidgets.QDoubleSpinBox()
-        self.subtitle_scale_spinbox.setRange(3.0, 5.0)
+        self.subtitle_scale_spinbox.setRange(2.0, 7.0)
         self.subtitle_scale_spinbox.setSingleStep(0.1)
         self.subtitle_scale_spinbox.setDecimals(1)
         self.subtitle_scale_spinbox.setSuffix("%")
