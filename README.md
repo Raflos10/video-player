@@ -1,32 +1,60 @@
-# Video Player
+# Untitled Video Player
+
+A video player application built with PySide6.
 
 ## Features
 
-* Fullscreen
-* Subtitles
-* Mute
+* Fullscreen mode
+* Subtitle support  
+* Audio muting
+* Custom keyboard shortcuts
 
-## Development
+## Quick Start
 
-1. Clone the repository:
-    ```bash
-    git clone <repository-url>
-    ```
-2. Set up a virtual environment and install dependencies:
-    ```bash
-    python -m venv venv
-    source venv/bin/activate
-    pip install -e .
-    ```
-3. Run the application from the command line:
-    ```bash
-    python src/main.py
-    ```
+```bash
+# Clone and setup
+git clone <repository-url>
+cd untitled-video-player
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-## Issues
+# Install everything
+pip install -e ".[dev]"
 
-If you encounter issues while using the video player, please open an issue on GitHub.
+# Run
+python src/main.py
+```
+
+## PyCharm Setup
+
+1. **Set interpreter:** Settings → Project → Python Interpreter → Select `venv/bin/python`
+
+2. **Enable MyPy** (type checking):
+   - Settings → Plugins → Install "Mypy"
+   - Settings → Tools → Mypy → Check "Use Mypy"
+
+3. **Enable Ruff** (linting/formatting):
+   - Settings → Tools → Ruff → Check "Use ruff" and "Use ruff format"
+
+## Development Commands
+
+```bash
+mypy src/              # Type check
+ruff check src/        # Lint
+ruff format src/       # Format
+pytest                 # Test
+```
+
+## Code Standards
+
+All functions require type annotations:
+```python
+def process_video(path: str, volume: float) -> bool:
+    return True
+```
+
+Before committing: `mypy src/ && ruff check src/ && pytest`
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0.
+GNU General Public License v3.0
