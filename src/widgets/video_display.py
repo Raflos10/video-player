@@ -1,16 +1,23 @@
-from PySide6 import QtCore, QtWidgets, QtMultimedia, QtMultimediaWidgets, QtGui
+from collections.abc import Callable
 
-from settings.settings_manager import settings_manager
-from subtitle.subtitle_graphics_item import SubtitleGraphicsItem
+from PySide6 import QtCore, QtGui, QtMultimedia, QtMultimediaWidgets, QtWidgets
+from PySide6.QtGui import QEnterEvent, QMouseEvent, QResizeEvent
+from PySide6.QtWidgets import QWidget
+
+from media_controller import MediaController
 from settings.setting_keys import SettingKeys
+from settings.settings_manager import settings_manager
+from subtitle.subtitle import Subtitle
+from subtitle.subtitle_entry import SubtitleEntry
+from subtitle.subtitle_graphics_item import SubtitleGraphicsItem
 
 
 class VideoDisplay(QtWidgets.QGraphicsView):
-    fullscreenToggled = QtCore.Signal()
-    fileDialogRequested = QtCore.Signal()
-    playToggled = QtCore.Signal()
+    fullscreen_toggled = QtCore.Signal()
+    file_dialog_requested = QtCore.Signal()
+    play_toggled = QtCore.Signal()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
 
         self.mediaStatus = (
@@ -39,7 +46,9 @@ class VideoDisplay(QtWidgets.QGraphicsView):
         # self.busyProxy = QtWidgets.QGraphicsProxyWidget()
         # self.busyIndicator = QtWidgets.QProgressBar()
         # self.busyIndicator.setRange(0, 0)  # Indeterminate
-        # self.busyIndicator.setStyleSheet("background-color: rgba(0,0,0,128); color: white;")
+        # self.busyIndicator.setStyleSheet(
+        #   "background-color: rgba(0,0,0,128); color: white;"
+        # )
         # self.busyProxy.setWidget(self.busyIndicator)
         # self.graphics_scene.addItem(self.busyProxy)
 
@@ -52,24 +61,29 @@ class VideoDisplay(QtWidgets.QGraphicsView):
         self.cursor_hide_timer.setSingleShot(True)
         self.cursor_visible = True
 
-    def connect_signals(self, media_controller, toggle_fullscreen, file_dialog_handler):
+    def connect_signals(
+        self,
+        media_controller: MediaController,
+        toggle_fullscreen: Callable,
+        file_dialog_handler: Callable,
+    ) -> None:
         settings_manager.settings_changed.connect(self.on_settings_changed)
 
-        self.fullscreenToggled.connect(toggle_fullscreen)
-        self.fileDialogRequested.connect(file_dialog_handler)
-        self.playToggled.connect(media_controller.toggle_playback)
+        self.fullscreen_toggled.connect(toggle_fullscreen)
+        self.file_dialog_requested.connect(file_dialog_handler)
+        self.play_toggled.connect(media_controller.toggle_playback)
 
-    def on_settings_changed(self, key: str, value):
+    def on_settings_changed(self, key: str, value: bool) -> None:
         if key == SettingKeys.ENABLE_SUBTITLES:
             self.subtitle_item.setVisible(value)
 
-    def update_subtitle(self, position_ms, subtitles):
+    def update_subtitle(self, position_ms: int, subtitles: Subtitle) -> None:
         if subtitles:
             entries = subtitles.get_all_at_time(position_ms)
             if entries != self.current_subtitle_entries:
                 self.on_new_subtitles(entries)
 
-    def on_new_subtitles(self, entries):
+    def on_new_subtitles(self, entries: list[SubtitleEntry]) -> None:
         enable_subtitles = settings_manager.value(SettingKeys.ENABLE_SUBTITLES)
         if len(entries) == 0 or not enable_subtitles:
             self.subtitle_item.setVisible(False)
@@ -82,14 +96,14 @@ class VideoDisplay(QtWidgets.QGraphicsView):
         self.subtitle_item.setPlainText(entry.text)
         self.update_scene_rect()
 
-    def set_media_status(self, status):
+    def set_media_status(self, status: QtMultimedia.QMediaPlayer.MediaStatus) -> None:
         self.mediaStatus = status
         self.center_text.setVisible(
             status == QtMultimedia.QMediaPlayer.MediaStatus.NoMedia
         )
         self.update_scene_rect()
 
-    def update_scene_rect(self):
+    def update_scene_rect(self) -> None:
         self.graphics_scene.setSceneRect(0, 0, self.width(), self.height())
         self.video_item.setSize(QtCore.QSizeF(self.width(), self.height()))
 
@@ -110,53 +124,56 @@ class VideoDisplay(QtWidgets.QGraphicsView):
             (self.height() * 0.95) - self.subtitle_item.boundingRect().height(),
         )
 
-        # self.busyProxy.setPos(center_x - self.busyProxy.boundingRect().width() / 2, center_y - self.busyProxy.boundingRect().height() / 2)
+        # self.busyProxy.setPos(
+        #   center_x - self.busyProxy.boundingRect().width() / 2,
+        #   center_y - self.busyProxy.boundingRect().height() / 2
+        # )
 
-    def hide_cursor(self):
+    def hide_cursor(self) -> None:
         self.setCursor(QtCore.Qt.CursorShape.BlankCursor)
         self.cursor_visible = False
 
-    def show_cursor(self):
+    def show_cursor(self) -> None:
         self.unsetCursor()
         self.cursor_visible = True
 
-    def restart_cursor_timer(self):
+    def restart_cursor_timer(self) -> None:
         if not self.cursor_visible:
             self.show_cursor()
 
         self.cursor_hide_timer.start(3000)
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:  # noqa: N802
         self.restart_cursor_timer()
         super().mouseMoveEvent(event)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QMouseEvent) -> None:  # noqa: N802
         self.restart_cursor_timer()
 
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
             if self.mediaStatus == QtMultimedia.QMediaPlayer.MediaStatus.NoMedia:
-                self.fileDialogRequested.emit()
+                self.file_dialog_requested.emit()
             else:
-                self.playToggled.emit()
+                self.play_toggled.emit()
         super().mousePressEvent(event)
 
-    def mouseDoubleClickEvent(self, event):
+    def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:  # noqa: N802
         self.restart_cursor_timer()
 
         if event.button() == QtCore.Qt.MouseButton.LeftButton:
-            self.fullscreenToggled.emit()
+            self.fullscreen_toggled.emit()
         super().mouseDoubleClickEvent(event)
 
-    def enterEvent(self, event):
+    def enterEvent(self, event: QEnterEvent) -> None:  # noqa: N802
         self.restart_cursor_timer()
         super().enterEvent(event)
 
-    def leaveEvent(self, event):
+    def leaveEvent(self, event: QMouseEvent) -> None:  # noqa: N802
         self.cursor_hide_timer.stop()
         if not self.cursor_visible:
             self.show_cursor()
         super().leaveEvent(event)
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QResizeEvent) -> None:  # noqa: N802
         super().resizeEvent(event)
         self.update_scene_rect()

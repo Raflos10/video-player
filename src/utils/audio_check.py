@@ -1,12 +1,17 @@
 """
 Audio device detection and system check for PySide6 multimedia.
 """
-import sys
+
+import logging
 import platform
+from pathlib import Path
+
 from PySide6 import QtMultimedia
 
+logger = logging.getLogger(__name__)
 
-def check_audio_devices():
+
+def check_audio_devices() -> tuple[bool, str | None]:
     """
     Check if audio devices are detected by Qt.
     Returns (has_audio, warning_message)
@@ -23,10 +28,9 @@ def check_audio_devices():
     if system == "Linux":
         # Check if we're on Arch-based system
         try:
-            with open("/etc/os-release") as f:
-                os_info = f.read()
-                is_arch = "arch" in os_info.lower() or "manjaro" in os_info.lower()
-        except:
+            os_info = Path("/etc/os-release").read_text()
+            is_arch = "arch" in os_info.lower() or "manjaro" in os_info.lower()
+        except OSError:
             is_arch = False
 
         if is_arch:
@@ -85,20 +89,21 @@ Press Enter to continue without audio, or Ctrl+C to exit...
     return False, warning
 
 
-def check_audio_with_prompt():
+def check_audio_with_prompt() -> bool:
     """
     Check audio and prompt user if there's an issue.
-    Returns True if should continue, False if should exit.
+    Returns True if it should continue, False if it should exit.
     """
     has_audio, warning = check_audio_devices()
 
     if not has_audio and warning:
-        print(warning, file=sys.stderr)
+        logger.warning(warning)
         try:
             input()
-            return True
         except KeyboardInterrupt:
-            print("\nExiting...")
+            logger.info("Exiting...")
             return False
+        else:
+            return True
 
     return True

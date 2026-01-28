@@ -1,11 +1,19 @@
+import logging
 import sys
+
 from PySide6 import QtWidgets
 
-from window.application_window import ApplicationWindow
-from utils.audio_check import check_audio_with_prompt
 from theme import Theme
+from utils.audio_check import check_audio_with_prompt
+from window.application_window import ApplicationWindow
 
-def main():
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s: %(message)s",
+)
+
+
+def main() -> None:
     app = QtWidgets.QApplication([])
     app.setStyleSheet(Theme.DARK)
 
@@ -18,7 +26,6 @@ def main():
     main_window.show()
 
     sys.exit(app.exec())
-
 
 
 if __name__ == "__main__":

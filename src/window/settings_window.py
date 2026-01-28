@@ -1,62 +1,87 @@
-from typing import cast
-from PySide6 import QtWidgets, QtGui
+from PySide6 import QtGui, QtWidgets
+from PySide6.QtWidgets import QWidget
 
-from settings.setting_keys import SettingKeys
+from settings.setting_keys import DEFAULTS, SettingKeys
 from settings.settings_manager import settings_manager
 
 
+def _create_key_sequence_edit() -> QtWidgets.QKeySequenceEdit:
+    edit = QtWidgets.QKeySequenceEdit()
+    edit.setClearButtonEnabled(True)
+    return edit
+
+
+def _load_shortcut(edit: QtWidgets.QKeySequenceEdit, key: str) -> None:
+    shortcut = settings_manager.get_str(key)
+    edit.setKeySequence(QtGui.QKeySequence.fromString(shortcut))
+
+
+def _save_shortcut(edit: QtWidgets.QKeySequenceEdit, key: str) -> None:
+    settings_manager.set_value(key, edit.keySequence().toString())
+
+
 class SettingsWindow(QtWidgets.QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Settings")
         self.setModal(True)
         self.resize(400, 300)
 
-        # Main layout
         layout = QtWidgets.QVBoxLayout(self)
-
-        # Tab widget for sections
         self.tab_widget = QtWidgets.QTabWidget()
         layout.addWidget(self.tab_widget)
 
-        # Appearance tab
-        appearance_tab = QtWidgets.QWidget()
-        appearance_layout = QtWidgets.QVBoxLayout(appearance_tab)
-        self.show_menu_bar_checkbox = QtWidgets.QCheckBox("Show Menu Bar")
-        appearance_layout.addWidget(self.show_menu_bar_checkbox)
-        self.enable_subtitles_checkbox = QtWidgets.QCheckBox("Enable Subtitles")
-        appearance_layout.addWidget(self.enable_subtitles_checkbox)
+        self._create_appearance_tab()
+        self._create_behavior_tab()
+        self._create_keyboard_tab()
+        self._create_buttons(layout)
 
-        # Subtitle font scale (percentage of screen height)
-        subtitle_scale_layout = QtWidgets.QHBoxLayout()
-        subtitle_scale_layout.addWidget(QtWidgets.QLabel("Subtitle Size (% of screen):"))
+        self.refresh_ui()
+
+    def _create_appearance_tab(self) -> None:
+        tab = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(tab)
+
+        self.show_menu_bar_checkbox = QtWidgets.QCheckBox("Show Menu Bar")
+        layout.addWidget(self.show_menu_bar_checkbox)
+
+        self.enable_subtitles_checkbox = QtWidgets.QCheckBox("Enable Subtitles")
+        layout.addWidget(self.enable_subtitles_checkbox)
+
+        # Subtitle font scale
+        scale_layout = QtWidgets.QHBoxLayout()
+        scale_layout.addWidget(QtWidgets.QLabel("Subtitle Size (% of screen):"))
         self.subtitle_scale_spinbox = QtWidgets.QDoubleSpinBox()
         self.subtitle_scale_spinbox.setRange(2.0, 7.0)
         self.subtitle_scale_spinbox.setSingleStep(0.1)
         self.subtitle_scale_spinbox.setDecimals(1)
         self.subtitle_scale_spinbox.setSuffix("%")
-        subtitle_scale_layout.addWidget(self.subtitle_scale_spinbox)
-        appearance_layout.addLayout(subtitle_scale_layout)
+        scale_layout.addWidget(self.subtitle_scale_spinbox)
+        layout.addLayout(scale_layout)
 
-        appearance_layout.addStretch()
-        self.tab_widget.addTab(appearance_tab, "Appearance")
+        layout.addStretch()
+        self.tab_widget.addTab(tab, "Appearance")
 
-        # Behavior tab
-        behavior_tab = QtWidgets.QWidget()
-        behavior_layout = QtWidgets.QVBoxLayout(behavior_tab)
+    def _create_behavior_tab(self) -> None:
+        tab = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(tab)
+
         seek_step_label = QtWidgets.QLabel("Seek Step (seconds):")
         self.seek_step_spinbox = QtWidgets.QSpinBox()
         self.seek_step_spinbox.setRange(1, 60)
-        self.save_position_checkbox = QtWidgets.QCheckBox("Save position on exit")
-        behavior_layout.addWidget(seek_step_label)
-        behavior_layout.addWidget(self.seek_step_spinbox)
-        behavior_layout.addWidget(self.save_position_checkbox)
-        behavior_layout.addStretch()
-        self.tab_widget.addTab(behavior_tab, "Behavior")
 
-        # Keyboard Shortcuts tab
-        keyboard_tab = QtWidgets.QWidget()
-        keyboard_main_layout = QtWidgets.QVBoxLayout(keyboard_tab)
+        self.save_position_checkbox = QtWidgets.QCheckBox("Save position on exit")
+
+        layout.addWidget(seek_step_label)
+        layout.addWidget(self.seek_step_spinbox)
+        layout.addWidget(self.save_position_checkbox)
+        layout.addStretch()
+
+        self.tab_widget.addTab(tab, "Behavior")
+
+    def _create_keyboard_tab(self) -> None:
+        tab = QtWidgets.QWidget()
+        main_layout = QtWidgets.QVBoxLayout(tab)
 
         # Instructions
         instructions = QtWidgets.QLabel(
@@ -65,132 +90,86 @@ class SettingsWindow(QtWidgets.QDialog):
         )
         instructions.setWordWrap(True)
         instructions.setStyleSheet("color: gray; margin-bottom: 10px;")
-        keyboard_main_layout.addWidget(instructions)
+        main_layout.addWidget(instructions)
 
         # Shortcuts form
-        keyboard_layout = QtWidgets.QFormLayout()
-        keyboard_layout.setFieldGrowthPolicy(
+        form_layout = QtWidgets.QFormLayout()
+        form_layout.setFieldGrowthPolicy(
             QtWidgets.QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow
         )
 
-        self.play_pause_edit = QtWidgets.QKeySequenceEdit()
-        self.play_pause_edit.setClearButtonEnabled(True)
+        self.play_pause_edit = _create_key_sequence_edit()
+        self.seek_forward_edit = _create_key_sequence_edit()
+        self.seek_backward_edit = _create_key_sequence_edit()
+        self.toggle_mute_edit = _create_key_sequence_edit()
+        self.fullscreen_edit = _create_key_sequence_edit()
+        self.toggle_subtitles_edit = _create_key_sequence_edit()
 
-        self.seek_forward_edit = QtWidgets.QKeySequenceEdit()
-        self.seek_forward_edit.setClearButtonEnabled(True)
+        form_layout.addRow("Play/Pause:", self.play_pause_edit)
+        form_layout.addRow("Seek Forward:", self.seek_forward_edit)
+        form_layout.addRow("Seek Backward:", self.seek_backward_edit)
+        form_layout.addRow("Toggle Mute:", self.toggle_mute_edit)
+        form_layout.addRow("Toggle Fullscreen:", self.fullscreen_edit)
+        form_layout.addRow("Toggle Subtitles:", self.toggle_subtitles_edit)
 
-        self.seek_backward_edit = QtWidgets.QKeySequenceEdit()
-        self.seek_backward_edit.setClearButtonEnabled(True)
+        main_layout.addLayout(form_layout)
+        main_layout.addStretch()
 
-        self.toggle_mute_edit = QtWidgets.QKeySequenceEdit()
-        self.toggle_mute_edit.setClearButtonEnabled(True)
+        # Reset button
+        reset_btn = QtWidgets.QPushButton("Reset to Defaults")
+        reset_btn.clicked.connect(self.reset_shortcuts_to_defaults)
+        main_layout.addWidget(reset_btn)
 
-        self.fullscreen_edit = QtWidgets.QKeySequenceEdit()
-        self.fullscreen_edit.setClearButtonEnabled(True)
+        self.tab_widget.addTab(tab, "Keyboard Shortcuts")
 
-        self.toggle_subtitles_edit = QtWidgets.QKeySequenceEdit()
-        self.toggle_subtitles_edit.setClearButtonEnabled(True)
-
-        keyboard_layout.addRow("Play/Pause:", self.play_pause_edit)
-        keyboard_layout.addRow("Seek Forward:", self.seek_forward_edit)
-        keyboard_layout.addRow("Seek Backward:", self.seek_backward_edit)
-        keyboard_layout.addRow("Toggle Mute:", self.toggle_mute_edit)
-        keyboard_layout.addRow("Toggle Fullscreen:", self.fullscreen_edit)
-        keyboard_layout.addRow("Toggle Subtitles:", self.toggle_subtitles_edit)
-
-        keyboard_main_layout.addLayout(keyboard_layout)
-        keyboard_main_layout.addStretch()
-
-        # Reset to defaults button
-        reset_shortcuts_btn = QtWidgets.QPushButton("Reset to Defaults")
-        reset_shortcuts_btn.clicked.connect(self.reset_shortcuts_to_defaults)
-        keyboard_main_layout.addWidget(reset_shortcuts_btn)
-
-        self.tab_widget.addTab(keyboard_tab, "Keyboard Shortcuts")
-
-        # Buttons
+    def _create_buttons(self, layout: QtWidgets.QVBoxLayout) -> None:
         button_box = QtWidgets.QDialogButtonBox(
-            QtWidgets.QDialogButtonBox.StandardButton.Ok |
-            QtWidgets.QDialogButtonBox.StandardButton.Cancel
+            QtWidgets.QDialogButtonBox.StandardButton.Ok
+            | QtWidgets.QDialogButtonBox.StandardButton.Cancel
         )
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
 
-        self.refresh_ui()
-
-    def refresh_ui(self):
-        show_menu_bar = settings_manager.value(SettingKeys.SHOW_MENU_BAR)
-        self.show_menu_bar_checkbox.setChecked(bool(show_menu_bar))
-
-        enable_subtitles = settings_manager.value(SettingKeys.ENABLE_SUBTITLES)
-        self.enable_subtitles_checkbox.setChecked(bool(enable_subtitles))
-
-        subtitle_font_scale = settings_manager.value(SettingKeys.SUBTITLE_FONT_SCALE)
-        self.subtitle_scale_spinbox.setValue(float(subtitle_font_scale))
-
-        seek_step = settings_manager.value(SettingKeys.SEEK_STEP)
-        self.seek_step_spinbox.setValue(int(cast(int, seek_step)))
-
-        save_position = settings_manager.value(SettingKeys.SAVE_POSITION_ON_EXIT)
-        self.save_position_checkbox.setChecked(bool(save_position))
-
-        play_pause_shortcut = settings_manager.value(SettingKeys.PLAY_PAUSE_SHORTCUT)
-        self.play_pause_edit.setKeySequence(
-            QtGui.QKeySequence.fromString(str(play_pause_shortcut))
+    def refresh_ui(self) -> None:
+        self.show_menu_bar_checkbox.setChecked(
+            settings_manager.get_bool(SettingKeys.SHOW_MENU_BAR)
+        )
+        self.enable_subtitles_checkbox.setChecked(
+            settings_manager.get_bool(SettingKeys.ENABLE_SUBTITLES)
+        )
+        self.subtitle_scale_spinbox.setValue(
+            settings_manager.get_float(SettingKeys.SUBTITLE_FONT_SCALE)
+        )
+        self.seek_step_spinbox.setValue(settings_manager.get_int(SettingKeys.SEEK_STEP))
+        self.save_position_checkbox.setChecked(
+            settings_manager.get_bool(SettingKeys.SAVE_POSITION_ON_EXIT)
         )
 
-        seek_forward_shortcut = settings_manager.value(
-            SettingKeys.SEEK_FORWARD_SHORTCUT
-        )
-        self.seek_forward_edit.setKeySequence(
-            QtGui.QKeySequence.fromString(str(seek_forward_shortcut))
-        )
-
-        seek_backward_shortcut = settings_manager.value(
-            SettingKeys.SEEK_BACKWARD_SHORTCUT
-        )
-        self.seek_backward_edit.setKeySequence(
-            QtGui.QKeySequence.fromString(str(seek_backward_shortcut))
+        _load_shortcut(self.play_pause_edit, SettingKeys.PLAY_PAUSE_SHORTCUT)
+        _load_shortcut(self.seek_forward_edit, SettingKeys.SEEK_FORWARD_SHORTCUT)
+        _load_shortcut(self.seek_backward_edit, SettingKeys.SEEK_BACKWARD_SHORTCUT)
+        _load_shortcut(self.toggle_mute_edit, SettingKeys.TOGGLE_MUTE_SHORTCUT)
+        _load_shortcut(self.fullscreen_edit, SettingKeys.FULLSCREEN_SHORTCUT)
+        _load_shortcut(
+            self.toggle_subtitles_edit, SettingKeys.TOGGLE_SUBTITLES_SHORTCUT
         )
 
-        toggle_mute_shortcut = settings_manager.value(SettingKeys.TOGGLE_MUTE_SHORTCUT)
-        self.toggle_mute_edit.setKeySequence(
-            QtGui.QKeySequence.fromString(str(toggle_mute_shortcut))
-        )
-
-        fullscreen_shortcut = settings_manager.value(SettingKeys.FULLSCREEN_SHORTCUT)
-        self.fullscreen_edit.setKeySequence(
-            QtGui.QKeySequence.fromString(str(fullscreen_shortcut))
-        )
-
-        toggle_subtitles_shortcut = settings_manager.value(
-            SettingKeys.TOGGLE_SUBTITLES_SHORTCUT
-        )
-        self.toggle_subtitles_edit.setKeySequence(
-            QtGui.QKeySequence.fromString(str(toggle_subtitles_shortcut))
-        )
-
-    def reset_shortcuts_to_defaults(self):
-        """Reset all keyboard shortcuts to their default values."""
-        # Define default shortcuts - adjust these to match your application's defaults
-        defaults = {
-            'play_pause': 'Space',
-            'seek_forward': 'Right',
-            'seek_backward': 'Left',
-            'toggle_mute': 'M',
-            'fullscreen': 'F',
-            'toggle_subtitles': 'S'
+    def reset_shortcuts_to_defaults(self) -> None:
+        shortcuts = {
+            self.play_pause_edit: SettingKeys.PLAY_PAUSE_SHORTCUT,
+            self.seek_forward_edit: SettingKeys.SEEK_FORWARD_SHORTCUT,
+            self.seek_backward_edit: SettingKeys.SEEK_BACKWARD_SHORTCUT,
+            self.toggle_mute_edit: SettingKeys.TOGGLE_MUTE_SHORTCUT,
+            self.fullscreen_edit: SettingKeys.FULLSCREEN_SHORTCUT,
+            self.toggle_subtitles_edit: SettingKeys.TOGGLE_SUBTITLES_SHORTCUT,
         }
 
-        self.play_pause_edit.setKeySequence(QtGui.QKeySequence.fromString(defaults['play_pause']))
-        self.seek_forward_edit.setKeySequence(QtGui.QKeySequence.fromString(defaults['seek_forward']))
-        self.seek_backward_edit.setKeySequence(QtGui.QKeySequence.fromString(defaults['seek_backward']))
-        self.toggle_mute_edit.setKeySequence(QtGui.QKeySequence.fromString(defaults['toggle_mute']))
-        self.fullscreen_edit.setKeySequence(QtGui.QKeySequence.fromString(defaults['fullscreen']))
-        self.toggle_subtitles_edit.setKeySequence(QtGui.QKeySequence.fromString(defaults['toggle_subtitles']))
+        for edit, key in shortcuts.items():
+            default_value = DEFAULTS[key]
+            edit.setKeySequence(QtGui.QKeySequence.fromString(str(default_value)))
 
-    def accept(self):
+    def accept(self) -> None:
         settings_manager.set_value(
             SettingKeys.SHOW_MENU_BAR, self.show_menu_bar_checkbox.isChecked()
         )
@@ -204,30 +183,17 @@ class SettingsWindow(QtWidgets.QDialog):
             SettingKeys.SEEK_STEP, self.seek_step_spinbox.value()
         )
         settings_manager.set_value(
-            SettingKeys.SAVE_POSITION_ON_EXIT, self.save_position_checkbox.isChecked()
+            SettingKeys.SAVE_POSITION_ON_EXIT,
+            self.save_position_checkbox.isChecked(),
         )
-        settings_manager.set_value(
-            SettingKeys.PLAY_PAUSE_SHORTCUT,
-            self.play_pause_edit.keySequence().toString(),
+
+        _save_shortcut(self.play_pause_edit, SettingKeys.PLAY_PAUSE_SHORTCUT)
+        _save_shortcut(self.seek_forward_edit, SettingKeys.SEEK_FORWARD_SHORTCUT)
+        _save_shortcut(self.seek_backward_edit, SettingKeys.SEEK_BACKWARD_SHORTCUT)
+        _save_shortcut(self.toggle_mute_edit, SettingKeys.TOGGLE_MUTE_SHORTCUT)
+        _save_shortcut(self.fullscreen_edit, SettingKeys.FULLSCREEN_SHORTCUT)
+        _save_shortcut(
+            self.toggle_subtitles_edit, SettingKeys.TOGGLE_SUBTITLES_SHORTCUT
         )
-        settings_manager.set_value(
-            SettingKeys.SEEK_FORWARD_SHORTCUT,
-            self.seek_forward_edit.keySequence().toString(),
-        )
-        settings_manager.set_value(
-            SettingKeys.SEEK_BACKWARD_SHORTCUT,
-            self.seek_backward_edit.keySequence().toString(),
-        )
-        settings_manager.set_value(
-            SettingKeys.TOGGLE_MUTE_SHORTCUT,
-            self.toggle_mute_edit.keySequence().toString(),
-        )
-        settings_manager.set_value(
-            SettingKeys.FULLSCREEN_SHORTCUT,
-            self.fullscreen_edit.keySequence().toString(),
-        )
-        settings_manager.set_value(
-            SettingKeys.TOGGLE_SUBTITLES_SHORTCUT,
-            self.toggle_subtitles_edit.keySequence().toString(),
-        )
+
         super().accept()

@@ -1,23 +1,27 @@
-from PySide6 import QtCore, QtWidgets, QtMultimedia
-from PySide6.QtCore import QPoint
+from typing import TYPE_CHECKING
 
-from media_controller import MediaController
+from PySide6 import QtCore, QtMultimedia, QtWidgets
+from PySide6.QtCore import QPoint
+from PySide6.QtWidgets import QWidget
+
+if TYPE_CHECKING:
+    from media_controller import MediaController
 from primitive.slider import ClickableSlider
 from utils.helpers import format_time
 
-MOUSE_NEAR_THRESHOLD = 50
+MOUSE_NEAR_THRESHOLD: int = 50
 
 
 class VideoControls(QtWidgets.QFrame):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
 
         self.setFixedHeight(40)
 
         self.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
         self.setStyleSheet("""
-            QFrame { 
-                background-color: rgb(35, 35, 35); 
+            QFrame {
+                background-color: rgb(35, 35, 35);
                 border-top: 1px solid rgb(60, 60, 60);
             }
             QPushButton {
@@ -46,7 +50,9 @@ class VideoControls(QtWidgets.QFrame):
 
         # Play/Pause button with icon
         self.play_button = QtWidgets.QPushButton()
-        self.play_button.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay))
+        self.play_button.setIcon(
+            style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
+        )
         self.play_button.setIconSize(QtCore.QSize(18, 18))
         self.play_button.setFixedSize(24, 24)
         self.play_button.setToolTip("Play")
@@ -78,21 +84,31 @@ class VideoControls(QtWidgets.QFrame):
 
         # Mute button with icon
         self.mute_button = QtWidgets.QPushButton()
-        self.mute_button.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaVolume))
+        self.mute_button.setIcon(
+            style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaVolume)
+        )
         self.mute_button.setIconSize(QtCore.QSize(20, 20))
         self.mute_button.setFixedSize(24, 24)
         self.mute_button.setToolTip("Mute")
         main_layout.addWidget(self.mute_button)
 
         # Store icons for state changes
-        self.play_icon = style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
-        self.pause_icon = style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPause)
-        self.volume_icon = style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaVolume)
-        self.mute_icon = style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaVolumeMuted)
+        self.play_icon = style.standardIcon(
+            QtWidgets.QStyle.StandardPixmap.SP_MediaPlay
+        )
+        self.pause_icon = style.standardIcon(
+            QtWidgets.QStyle.StandardPixmap.SP_MediaPause
+        )
+        self.volume_icon = style.standardIcon(
+            QtWidgets.QStyle.StandardPixmap.SP_MediaVolume
+        )
+        self.mute_icon = style.standardIcon(
+            QtWidgets.QStyle.StandardPixmap.SP_MediaVolumeMuted
+        )
 
         self.set_enabled(False)
 
-    def connect_signals(self, media_controller: MediaController):
+    def connect_signals(self, media_controller: MediaController) -> None:
         self.seek_slider.sliderReleased.connect(
             lambda: media_controller.mediaPlayer.setPosition(self.seek_slider.value())
         )
@@ -101,18 +117,23 @@ class VideoControls(QtWidgets.QFrame):
             lambda v: media_controller.audioOutput.setVolume(v / 100.0)
         )
         self.mute_button.clicked.connect(
-            lambda: media_controller.audioOutput.setMuted(not media_controller.audioOutput.isMuted()))
+            lambda: media_controller.audioOutput.setMuted(
+                not media_controller.audioOutput.isMuted()
+            )
+        )
 
-    def set_current_time(self, time):
+    def set_current_time(self, time: float) -> None:
         self.current_time_label.setText(format_time(time))
         if not self.seek_slider.isSliderDown():
             self.seek_slider.setValue(int(time * 1000))
 
-    def set_duration(self, duration):
+    def set_duration(self, duration: float) -> None:
         self.duration_label.setText(format_time(duration))
         self.seek_slider.setMaximum(int(duration * 1000))
 
-    def set_playback_status(self, status):
+    def set_playback_status(
+        self, status: QtMultimedia.QMediaPlayer.PlaybackState
+    ) -> None:
         if status == QtMultimedia.QMediaPlayer.PlaybackState.PlayingState:
             self.play_button.setIcon(self.pause_icon)
             self.play_button.setToolTip("Pause")
@@ -120,7 +141,7 @@ class VideoControls(QtWidgets.QFrame):
             self.play_button.setIcon(self.play_icon)
             self.play_button.setToolTip("Play")
 
-    def set_muted_value(self, is_muted: bool):
+    def set_muted_value(self, is_muted: bool) -> None:
         if is_muted:
             self.mute_button.setIcon(self.mute_icon)
             self.mute_button.setToolTip("Unmute")
@@ -128,11 +149,11 @@ class VideoControls(QtWidgets.QFrame):
             self.mute_button.setIcon(self.volume_icon)
             self.mute_button.setToolTip("Mute")
 
-    def set_enabled(self, is_enabled):
+    def set_enabled(self, is_enabled: bool) -> None:
         self.play_button.setEnabled(is_enabled)
         self.seek_slider.setEnabled(is_enabled)
         self.volume_slider.setEnabled(is_enabled)
         self.mute_button.setEnabled(is_enabled)
 
-    def is_mouse_near(self, mouse_position: QPoint):
+    def is_mouse_near(self, mouse_position: QPoint) -> bool:
         return mouse_position.y() >= self.y() - MOUSE_NEAR_THRESHOLD

@@ -1,5 +1,3 @@
-from typing import Optional
-
 from PySide6 import QtCore
 
 from primitive.graphics_outlined_text_item import GraphicsOutlinedTextItem
@@ -8,7 +6,7 @@ from settings.settings_manager import settings_manager
 
 
 class SubtitleGraphicsItem(GraphicsOutlinedTextItem):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.setVisible(False)
@@ -17,28 +15,29 @@ class SubtitleGraphicsItem(GraphicsOutlinedTextItem):
 
         self.connect_signals()
 
-    def connect_signals(self):
+    def connect_signals(self) -> None:
         settings_manager.settings_changed.connect(self.on_settings_changed)
 
-    def setPlainText(self, text: Optional[str]):
-        super().setPlainText(text)
+    def setPlainText(self, text: str | None) -> None:  # noqa: N802
+        if text:
+            super().setPlainText(text)
         self.setVisible(bool(text))
 
-    def on_settings_changed(self, key: str):
+    def on_settings_changed(self, key: str) -> None:
         if key == SettingKeys.SUBTITLE_FONT_SCALE:
             self.update_subtitle_style()
 
-    def set_view_height(self, height: int):
+    def set_view_height(self, height: int) -> None:
         if self._view_height != height:
             self._view_height = height
             self.update_subtitle_style()
 
     def _calculate_font_size(self) -> int:
-        scale = settings_manager.value(SettingKeys.SUBTITLE_FONT_SCALE)
+        scale = settings_manager.get_float(SettingKeys.SUBTITLE_FONT_SCALE)
         calculated_size = int(self._view_height * (scale / 100.0))
         return max(12, min(calculated_size, 120))
 
-    def update_subtitle_style(self, font_size=None):
+    def update_subtitle_style(self, font_size: int | None = None) -> None:
         font = self.font()
 
         text_option = self.document().defaultTextOption()

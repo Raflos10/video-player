@@ -1,35 +1,40 @@
-from PySide6 import QtWidgets, QtGui, QtCore
+from PySide6 import QtCore, QtGui, QtWidgets
 
 
 class GraphicsOutlinedTextItem(QtWidgets.QGraphicsTextItem):
-    def __init__(self, outline_width=2, outline_color=None, text_color=None):
+    def __init__(
+        self,
+        outline_width: int = 2,
+        outline_color: QtGui.QColor | None = None,
+        text_color: QtGui.QColor | None = None,
+    ) -> None:
         super().__init__()
 
         self.outline_width = outline_width
         self.outline_color = outline_color or QtGui.QColor("black")
         self.text_color = text_color or QtGui.QColor("white")
 
-    def setPlainText(self, text):
+    def setPlainText(self, text: str) -> None:  # noqa: N802
         super().setPlainText(text)
         if text:
             self.apply_outline_format()
 
-    def set_outline_width(self, outline_width):
+    def set_outline_width(self, outline_width: int) -> None:
         self.outline_width = outline_width
         if self.toPlainText():
             self.apply_outline_format()
 
-    def set_outline_color(self, color):
+    def set_outline_color(self, color: QtGui.QColor) -> None:
         self.outline_color = color
         if self.toPlainText():
             self.apply_outline_format()
 
-    def set_text_color(self, color):
+    def set_text_color(self, color: QtGui.QColor) -> None:
         self.text_color = color
         if self.toPlainText():
             self.apply_outline_format()
 
-    def apply_outline_format(self):
+    def apply_outline_format(self) -> None:
         cursor = QtGui.QTextCursor(self.document())
         cursor.select(QtGui.QTextCursor.SelectionType.Document)
 
@@ -41,7 +46,7 @@ class GraphicsOutlinedTextItem(QtWidgets.QGraphicsTextItem):
             self.outline_width,
             QtCore.Qt.PenStyle.SolidLine,
             QtCore.Qt.PenCapStyle.RoundCap,
-            QtCore.Qt.PenJoinStyle.RoundJoin
+            QtCore.Qt.PenJoinStyle.RoundJoin,
         )
         outline_format.setTextOutline(outline_pen)
         cursor.mergeCharFormat(outline_format)

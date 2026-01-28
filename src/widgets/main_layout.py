@@ -1,11 +1,20 @@
-from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import QEvent, QObject
+from PySide6.QtGui import QResizeEvent
+from PySide6.QtWidgets import QWidget
 
 from widgets.video_controls import VideoControls
 from widgets.video_display import VideoDisplay
 
 
 class MainLayout(QtWidgets.QWidget):
-    def __init__(self, parent, video_display: VideoDisplay, video_controls: VideoControls, is_fullscreen: bool):
+    def __init__(
+        self,
+        parent: QWidget | None,
+        video_display: VideoDisplay,
+        video_controls: VideoControls,
+        is_fullscreen: bool,
+    ) -> None:
         super().__init__(parent)
         self.is_fullscreen = is_fullscreen
         QtWidgets.QApplication.instance().installEventFilter(self)
@@ -28,10 +37,10 @@ class MainLayout(QtWidgets.QWidget):
         self.is_overlay_mode = is_fullscreen
         self.set_overlay_mode(is_fullscreen)
 
-    def connect_signals(self, fullscreen_toggled: QtCore.Signal(bool)):
+    def connect_signals(self, fullscreen_toggled: QtCore.Signal(bool)) -> None:
         fullscreen_toggled.connect(self.on_fullscreen_toggle)
 
-    def set_overlay_mode(self, value: bool):
+    def set_overlay_mode(self, value: bool) -> None:
         if value:
             self.main_layout.removeWidget(self.video_controls)
             self.video_controls.setParent(self.overlay_container)
@@ -41,7 +50,7 @@ class MainLayout(QtWidgets.QWidget):
             self.main_layout.addWidget(self.video_controls)
         self.is_overlay_mode = value
 
-    def position_controls_at_bottom(self):
+    def position_controls_at_bottom(self) -> None:
         if not self.is_overlay_mode:
             return
 
@@ -53,14 +62,10 @@ class MainLayout(QtWidgets.QWidget):
 
         y_pos = display_rect.height() - controls_height
 
-        self.video_controls.setGeometry(
-            0, y_pos,
-            display_rect.width(),
-            controls_height
-        )
+        self.video_controls.setGeometry(0, y_pos, display_rect.width(), controls_height)
         self.video_controls.raise_()
 
-    def eventFilter(self, obj, event):
+    def eventFilter(self, obj: QObject, event: QEvent) -> bool:  # noqa: N802
         if self.is_fullscreen and event.type() == QtCore.QEvent.Type.MouseMove:
             global_pos = QtGui.QCursor.pos()
             local_pos = self.mapFromGlobal(global_pos)
@@ -73,13 +78,13 @@ class MainLayout(QtWidgets.QWidget):
 
         return super().eventFilter(obj, event)
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QResizeEvent) -> None:  # noqa: N802
         """Reposition controls when window resizes in overlay mode"""
         super().resizeEvent(event)
         if self.is_overlay_mode:
             self.position_controls_at_bottom()
 
-    def on_fullscreen_toggle(self, is_fullscreen: bool):
+    def on_fullscreen_toggle(self, is_fullscreen: bool) -> None:
         self.is_fullscreen = is_fullscreen
         self.video_controls.setVisible(not is_fullscreen)
         self.set_overlay_mode(is_fullscreen)

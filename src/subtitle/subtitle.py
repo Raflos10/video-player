@@ -1,18 +1,17 @@
 from bisect import bisect_right
-from typing import List
 
 from subtitle.subtitle_entry import SubtitleEntry
 from subtitle.subtitle_parser import parse
 
 
 class Subtitle:
-    def __init__(self, file_content: str):
+    def __init__(self, file_content: str) -> None:
         entries = parse(file_content)
 
         self._entries = sorted(entries, key=lambda e: e.start_ms)
         self._start_times = [e.start_ms for e in self._entries]
 
-    def get_all_at_time(self, time_ms: int) -> List[SubtitleEntry]:
+    def get_all_at_time(self, time_ms: int) -> list[SubtitleEntry]:
         result = []
         idx = bisect_right(self._start_times, time_ms) - 1
 

@@ -1,11 +1,14 @@
-from PySide6 import QtWidgets, QtGui, QtCore
+from collections.abc import Callable
+
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtWidgets import QWidget
 
 from settings.setting_keys import SettingKeys
 from settings.settings_manager import settings_manager
 
 
 class MainMenuBar(QtWidgets.QMenuBar):
-    def __init__(self, is_fullscreen: bool, parent=None):
+    def __init__(self, is_fullscreen: bool, parent: QWidget | None = None) -> None:
         super().__init__(parent)
 
         self.is_fullscreen = is_fullscreen
@@ -34,13 +37,13 @@ class MainMenuBar(QtWidgets.QMenuBar):
         exit_action.triggered.connect(QtWidgets.QApplication.quit)
 
     def connect_signals(
-            self,
-            file_dialog_handler,
-            toggle_fullscreen_handler,
-            settings_handler,
-            about_handler,
-            fullscreen_toggled: QtCore.Signal(bool)
-    ):
+        self,
+        file_dialog_handler: Callable,
+        toggle_fullscreen_handler: Callable,
+        settings_handler: Callable,
+        about_handler: Callable,
+        fullscreen_toggled: QtCore.Signal(bool),
+    ) -> None:
         settings_manager.settings_changed.connect(self.on_settings_changed)
 
         self.open_action.triggered.connect(file_dialog_handler)
@@ -50,21 +53,21 @@ class MainMenuBar(QtWidgets.QMenuBar):
         self.about_action.triggered.connect(about_handler)
         fullscreen_toggled.connect(self.on_fullscreen_toggle)
 
-    def _toggle_subtitles(self):
+    def _toggle_subtitles(self) -> None:
         current = settings_manager.value(SettingKeys.ENABLE_SUBTITLES)
         new_value = not current
         settings_manager.set_value(SettingKeys.ENABLE_SUBTITLES, new_value)
         self.toggle_subtitles_action.setChecked(new_value)
 
     # TODO: consolidate these bottom two functions
-    def on_settings_changed(self, key: str, value):
+    def on_settings_changed(self, key: str, value: bool) -> None:
         if key == SettingKeys.ENABLE_SUBTITLES:
-            self.toggle_subtitles_action.setChecked(bool(value))
+            self.toggle_subtitles_action.setChecked(value)
 
-    def refresh_ui(self):
-        enable_subtitles = settings_manager.value(SettingKeys.ENABLE_SUBTITLES)
-        self.toggle_subtitles_action.setChecked(bool(enable_subtitles))
+    def refresh_ui(self) -> None:
+        enable_subtitles = settings_manager.get_bool(SettingKeys.ENABLE_SUBTITLES)
+        self.toggle_subtitles_action.setChecked(enable_subtitles)
 
-    def on_fullscreen_toggle(self, is_fullscreen: bool):
+    def on_fullscreen_toggle(self, is_fullscreen: bool) -> None:
         self.is_fullscreen = is_fullscreen
         self.setVisible(not is_fullscreen)

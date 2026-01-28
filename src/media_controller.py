@@ -1,11 +1,19 @@
+from typing import TYPE_CHECKING
+
 from PySide6 import QtCore, QtMultimedia
+from PySide6.QtMultimedia import QMediaPlayer
+from PySide6.QtMultimediaWidgets import QGraphicsVideoItem
 
 from subtitle.subtitle import Subtitle
 from subtitle.subtitle_loader import load_subtitles
 
+if TYPE_CHECKING:
+    from widgets.video_controls import VideoControls
+    from widgets.video_display import VideoDisplay
+
 
 class MediaController:
-    def __init__(self, video_item):
+    def __init__(self, video_item: QGraphicsVideoItem) -> None:
         self.mediaPlayer = QtMultimedia.QMediaPlayer()
         self.audioOutput = QtMultimedia.QAudioOutput()
         self.audioOutput.setVolume(1.0)
@@ -13,7 +21,9 @@ class MediaController:
         self.mediaPlayer.setVideoOutput(video_item)
         self.subtitles = None
 
-    def connect_signals(self, video_controls, video_display):
+    def connect_signals(
+        self, video_controls: VideoControls, video_display: VideoDisplay
+    ) -> None:
         self.mediaPlayer.mediaStatusChanged.connect(
             lambda status: video_display.set_media_status(status)
         )
@@ -34,14 +44,14 @@ class MediaController:
         )
         self.audioOutput.mutedChanged.connect(video_controls.set_muted_value)
 
-    def load_media(self, file_path):
+    def load_media(self, file_path: str) -> None:
         self.mediaPlayer.setSource(QtCore.QUrl.fromLocalFile(file_path))
         subs_content = load_subtitles(file_path)
         if subs_content:
             self.subtitles = Subtitle(subs_content)
         self.mediaPlayer.play()
 
-    def toggle_playback(self):
+    def toggle_playback(self) -> None:
         if (
             self.mediaPlayer.playbackState()
             == QtMultimedia.QMediaPlayer.PlaybackState.PlayingState
@@ -51,7 +61,7 @@ class MediaController:
             self.mediaPlayer.play()
 
     @staticmethod
-    def is_media_loaded(status):
+    def is_media_loaded(status: QMediaPlayer.MediaStatus) -> bool:
         return status in (
             QtMultimedia.QMediaPlayer.MediaStatus.LoadedMedia,
             QtMultimedia.QMediaPlayer.MediaStatus.BufferedMedia,

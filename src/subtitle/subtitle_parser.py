@@ -1,6 +1,5 @@
 import re
 from enum import Enum, auto
-from typing import List, Optional
 
 from subtitle.subtitle_entry import SubtitleEntry
 
@@ -11,7 +10,7 @@ class SubtitleFormat(Enum):
     VTT = auto()
 
 
-def _parse_timestamp_line(line: str) -> Optional[tuple]:
+def _parse_timestamp_line(line: str) -> tuple[int, int] | None:
     timestamp_match = re.match(
         r"(\d{2}):(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})[,.](\d{3})",
         line,
@@ -30,7 +29,7 @@ def _parse_timestamp_line(line: str) -> Optional[tuple]:
     return None
 
 
-def _parse_srt(content: str, strip_text: bool = True) -> List[SubtitleEntry]:
+def _parse_srt(content: str, strip_text: bool = True) -> list[SubtitleEntry]:
     result = []
     blocks = content.strip().split("\n\n")
 
@@ -60,7 +59,7 @@ def _parse_srt(content: str, strip_text: bool = True) -> List[SubtitleEntry]:
     return result
 
 
-def _parse_vtt(content: str, strip_text: bool = True) -> List[SubtitleEntry]:
+def _parse_vtt(content: str, strip_text: bool = True) -> list[SubtitleEntry]:
     result = []
 
     content = re.sub(r"^WEBVTT[^\n]*\n\n?", "", content, flags=re.MULTILINE)
@@ -81,7 +80,7 @@ def _parse_vtt(content: str, strip_text: bool = True) -> List[SubtitleEntry]:
 
         if times:
             start_ms, end_ms = times
-            text_lines = lines[timestamp_line_idx + 1:]
+            text_lines = lines[timestamp_line_idx + 1 :]
             if strip_text:
                 text_lines = [line.strip() for line in text_lines]
             text = "\n".join(text_lines)
@@ -95,10 +94,10 @@ def _parse_vtt(content: str, strip_text: bool = True) -> List[SubtitleEntry]:
 
 
 def parse(
-        content: str,
-        subtitle_format: SubtitleFormat = SubtitleFormat.AUTO,
-        strip_text: bool = True,
-) -> List[SubtitleEntry]:
+    content: str,
+    subtitle_format: SubtitleFormat = SubtitleFormat.AUTO,
+    strip_text: bool = True,
+) -> list[SubtitleEntry]:
     match subtitle_format:
         case SubtitleFormat.SRT:
             return _parse_srt(content, strip_text)
