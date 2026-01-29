@@ -2,6 +2,7 @@ import logging
 import sys
 
 from PySide6 import QtWidgets
+from PySide6.QtGui import QIcon
 
 from theme import Theme
 from utils.audio_check import check_audio_with_prompt
@@ -15,6 +16,7 @@ logging.basicConfig(
 
 def main() -> None:
     app = QtWidgets.QApplication([])
+    app.setWindowIcon(QIcon("assets/icon.svg"))
     app.setStyleSheet(Theme.DARK)
 
     if not check_audio_with_prompt():
