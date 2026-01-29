@@ -84,7 +84,7 @@ class VideoDisplay(QtWidgets.QGraphicsView):
                 self.on_new_subtitles(entries)
 
     def on_new_subtitles(self, entries: list[SubtitleEntry]) -> None:
-        enable_subtitles = settings_manager.value(SettingKeys.ENABLE_SUBTITLES)
+        enable_subtitles = settings_manager.get_bool(SettingKeys.ENABLE_SUBTITLES)
         if len(entries) == 0 or not enable_subtitles:
             self.subtitle_item.setVisible(False)
             self.current_subtitle_entries = []

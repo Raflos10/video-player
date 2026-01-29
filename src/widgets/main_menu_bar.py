@@ -54,7 +54,7 @@ class MainMenuBar(QtWidgets.QMenuBar):
         fullscreen_toggled.connect(self.on_fullscreen_toggle)
 
     def _toggle_subtitles(self) -> None:
-        current = settings_manager.value(SettingKeys.ENABLE_SUBTITLES)
+        current = settings_manager.get_bool(SettingKeys.ENABLE_SUBTITLES)
         new_value = not current
         settings_manager.set_value(SettingKeys.ENABLE_SUBTITLES, new_value)
         self.toggle_subtitles_action.setChecked(new_value)
