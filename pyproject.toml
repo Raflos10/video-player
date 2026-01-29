@@ -26,6 +26,9 @@ untitled-video-player = "main:main"
 package-dir = {"" = "src"}
 py-modules = ["main", "theme", "media_controller", "shortcut_manager", "mpris_interface"]
 
+[tool.setuptools.package-data]
+untitled-video-player = ["assets/*.svg"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["*"]
