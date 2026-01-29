@@ -67,6 +67,11 @@ class VideoControls(QtWidgets.QFrame):
         # Seek slider
         self.seek_slider = ClickableSlider(QtCore.Qt.Orientation.Horizontal)
         self.seek_slider.setRange(0, 1000)
+        self.seek_slider.set_tooltip_formatter(
+            lambda v: f"{int(v / 1000 // 3600):02d}:"
+            f"{int((v / 1000 % 3600) // 60):02d}:"
+            f"{int(v / 1000 % 60):02d}"
+        )
         main_layout.addWidget(self.seek_slider, 1)  # Stretch factor of 1
 
         # Duration label
@@ -80,6 +85,7 @@ class VideoControls(QtWidgets.QFrame):
         self.volume_slider.setRange(0, 100)
         self.volume_slider.setValue(100)
         self.volume_slider.setFixedWidth(100)
+        self.volume_slider.set_tooltip_formatter(lambda v: f"{v}%")
         main_layout.addWidget(self.volume_slider)
 
         # Mute button with icon
@@ -152,8 +158,6 @@ class VideoControls(QtWidgets.QFrame):
     def set_enabled(self, is_enabled: bool) -> None:
         self.play_button.setEnabled(is_enabled)
         self.seek_slider.setEnabled(is_enabled)
-        self.volume_slider.setEnabled(is_enabled)
-        self.mute_button.setEnabled(is_enabled)
 
     def is_mouse_near(self, mouse_position: QPoint) -> bool:
         return mouse_position.y() >= self.y() - MOUSE_NEAR_THRESHOLD
