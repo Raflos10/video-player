@@ -1,3 +1,4 @@
+import logging
 from typing import TYPE_CHECKING
 
 from PySide6 import QtCore, QtMultimedia
@@ -6,6 +7,20 @@ from PySide6.QtMultimediaWidgets import QGraphicsVideoItem
 
 from subtitle.subtitle import Subtitle
 from subtitle.subtitle_loader import load_subtitles
+
+logger = logging.getLogger(__name__)
+
+try:
+    from mpris_interface import MPRISInterface
+
+    MPRIS_AVAILABLE = True
+except ImportError:
+    MPRISInterface = None
+
+    MPRIS_AVAILABLE = False
+    logger.info(
+        "MPRIS interface not available. Install dbus-python for Linux media controls."
+    )
 
 if TYPE_CHECKING:
     from widgets.video_controls import VideoControls
@@ -20,6 +35,14 @@ class MediaController:
         self.mediaPlayer.setAudioOutput(self.audioOutput)
         self.mediaPlayer.setVideoOutput(video_item)
         self.subtitles = None
+
+        self.mpris = None
+        if MPRIS_AVAILABLE:
+            try:
+                self.mpris = MPRISInterface(self, app_name="VideoPlayer")
+                logger.info("MPRIS interface initialized successfully")
+            except Exception as e:
+                logger.info("Failed to initialize MPRIS: %s", e)
 
     def connect_signals(
         self, video_controls: VideoControls, video_display: VideoDisplay
@@ -49,6 +72,10 @@ class MediaController:
         subs_content = load_subtitles(file_path)
         if subs_content:
             self.subtitles = Subtitle(subs_content)
+
+        if self.mpris:
+            self.mpris.update_metadata(file_path)
+
         self.mediaPlayer.play()
 
     def toggle_playback(self) -> None:
