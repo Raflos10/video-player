@@ -24,7 +24,7 @@ untitled-video-player = "main:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-py-modules = ["main", "theme", "media_controller", "shortcut_manager"]
+py-modules = ["main", "theme", "media_controller", "shortcut_manager", "mpris_interface"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
