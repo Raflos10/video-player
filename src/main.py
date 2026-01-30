@@ -16,7 +16,9 @@ logging.basicConfig(
 
 def main() -> None:
     app = QtWidgets.QApplication([])
-    app.setWindowIcon(QIcon("assets/icon.svg"))
+    app.setWindowIcon(
+        QIcon.fromTheme("untitled-video-player", QIcon("assets/icon.svg"))
+    )
     app.setStyleSheet(Theme.DARK)
 
     if not check_audio_with_prompt():
