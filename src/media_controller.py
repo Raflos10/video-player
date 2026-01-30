@@ -1,9 +1,11 @@
 import logging
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from PySide6 import QtCore, QtMultimedia
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtMultimediaWidgets import QGraphicsVideoItem
+from PySide6.QtWidgets import QApplication
 
 from subtitle.subtitle import Subtitle
 from subtitle.subtitle_loader import load_subtitles
@@ -45,7 +47,10 @@ class MediaController:
                 logger.info("Failed to initialize MPRIS: %s", e)
 
     def connect_signals(
-        self, video_controls: VideoControls, video_display: VideoDisplay
+        self,
+        video_controls: VideoControls,
+        video_display: VideoDisplay,
+        set_main_window_title: Callable[str],
     ) -> None:
         self.mediaPlayer.mediaStatusChanged.connect(
             lambda status: video_display.set_media_status(status)
@@ -67,6 +72,10 @@ class MediaController:
         )
         self.audioOutput.mutedChanged.connect(video_controls.set_muted_value)
 
+        self.mediaPlayer.metaDataChanged.connect(
+            lambda: self.on_metadata_update(set_main_window_title)
+        )
+
     def load_media(self, file_path: str) -> None:
         self.mediaPlayer.setSource(QtCore.QUrl.fromLocalFile(file_path))
         subs_content = load_subtitles(file_path)
@@ -77,6 +86,13 @@ class MediaController:
             self.mpris.update_metadata(file_path)
 
         self.mediaPlayer.play()
+
+    def on_metadata_update(self, set_main_window_title: Callable[str]) -> None:
+        title = (
+            self.mediaPlayer.metaData().value(QtMultimedia.QMediaMetaData.Key.Title)
+            or QApplication.applicationName()
+        )
+        set_main_window_title(title)
 
     def toggle_playback(self) -> None:
         if (

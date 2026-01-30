@@ -1,5 +1,6 @@
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtCore import QEvent
+from PySide6.QtWidgets import QApplication
 
 from media_controller import MediaController
 from shortcut_manager import ShortcutManager
@@ -18,7 +19,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
     def __init__(self, file_path: str | None = None) -> None:
         super().__init__()
 
-        self.setWindowTitle("Video Player")
+        self.setWindowTitle(QApplication.applicationName())
 
         self.menu_bar = MainMenuBar(self.isFullScreen())
         self.setMenuBar(self.menu_bar)
@@ -45,7 +46,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
     def connect_signals(self) -> None:
         self.shortcut_manager.connect_signals()
-        self.media_controller.connect_signals(self.video_controls, self.video_display)
+        self.media_controller.connect_signals(
+            self.video_controls, self.video_display, self.setWindowTitle
+        )
         self.video_controls.connect_signals(self.media_controller)
 
         def file_dialog_handler() -> None:

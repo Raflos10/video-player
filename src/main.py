@@ -16,6 +16,7 @@ logging.basicConfig(
 
 def main() -> None:
     app = QtWidgets.QApplication([])
+    app.setApplicationName("Video Player")
     app.setWindowIcon(
         QIcon.fromTheme("untitled-video-player", QIcon("assets/icon.svg"))
     )
